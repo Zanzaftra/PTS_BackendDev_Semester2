@@ -17,6 +17,7 @@ return new class extends Migration
             $table->text('alamat')->nullable();
             $table->string('no_telepon', 20);
             $table->string('email')->nullable();
+            $table->string('password')->nullable();
             $table->date('tanggal_daftar')->nullable();
             $table->enum('status_pelanggan', ['aktif', 'tidak aktif'])->default('aktif');
             $table->timestamps();
