@@ -7,9 +7,9 @@
 <a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
 </p>
 
-## About Laravel
+## About This project
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+project ini adalah project bisnis rindu water untuk tempat pembelian air putih yang jernih dan menyehatkan tubuh kita pastinya.Dibangun oleh tim yang berisi 3 orang yaitu Zaki Aliffatan putra dewanto, rehan primaa abdillah, dan zafarani hamizan.Dikumpulkan oleh Zaki Aliffatan putra dewanto dan project ini juga termasuk project pts-backend Development.
 
 - [Simple, fast routing engine](https://laravel.com/docs/routing).
 - [Powerful dependency injection container](https://laravel.com/docs/container).
