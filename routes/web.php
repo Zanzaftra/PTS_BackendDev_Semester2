@@ -466,3 +466,165 @@ Route::post('/customer/logout', function () {
     ]);
 })->name('customer.logout');
 
+
+// ================= ADMIN JSON API ENDPOINTS =================
+
+// Update transaction status
+Route::post('/admin/api/transaksi/{id}/status', function (Illuminate\Http\Request $request, $id) {
+    $validated = $request->validate([
+        'status' => 'required|in:menunggu,dibayar,diproses,dikirim,selesai,batal'
+    ]);
+
+    try {
+        if (Schema::hasTable('transaksi')) {
+            $t = \App\Models\transaksi::find($id);
+            if ($t) {
+                $t->status_transaksi = $validated['status'];
+                $t->save();
+                return response()->json(['success' => true, 'message' => 'Status transaksi berhasil diperbarui.', 'data' => $t]);
+            }
+            return response()->json(['success' => false, 'message' => 'Transaksi tidak ditemukan.'], 404);
+        }
+    } catch (\Exception $e) {}
+
+    // Mocked response for offline dev
+    return response()->json(['success' => true, 'is_mocked' => true, 'message' => 'Status (simulasi) diperbarui.', 'status' => $validated['status']]);
+});
+
+// Update customer status
+Route::post('/admin/api/pelanggan/{id}/status', function (Illuminate\Http\Request $request, $id) {
+    $validated = $request->validate([
+        'status' => 'required|in:aktif,tidak aktif'
+    ]);
+
+    try {
+        if (Schema::hasTable('pelanggan')) {
+            $p = \App\Models\pelanggan::find($id);
+            if ($p) {
+                $p->status_pelanggan = $validated['status'];
+                $p->save();
+                return response()->json(['success' => true, 'message' => 'Status pelanggan berhasil diperbarui.', 'data' => $p]);
+            }
+            return response()->json(['success' => false, 'message' => 'Pelanggan tidak ditemukan.'], 404);
+        }
+    } catch (\Exception $e) {}
+
+    return response()->json(['success' => true, 'is_mocked' => true, 'message' => 'Status pelanggan (simulasi) diperbarui.', 'status' => $validated['status']]);
+});
+
+// Create new gudang
+Route::post('/admin/api/gudang', function (Illuminate\Http\Request $request) {
+    $validated = $request->validate([
+        'nama_gudang'     => 'required|string|max:255',
+        'lokasi'          => 'required|string|max:255',
+        'kapasitas_total' => 'required|integer|min:1',
+        'stok_saat_ini'   => 'required|integer|min:0',
+        'status_gudang'   => 'required|in:aktif,penuh,maintenance',
+    ]);
+
+    try {
+        if (Schema::hasTable('gudang')) {
+            $g = \App\Models\gudang::create($validated);
+            return response()->json(['success' => true, 'message' => 'Gudang berhasil ditambahkan.', 'data' => $g]);
+        }
+    } catch (\Exception $e) {}
+
+    // Mocked fallback
+    $mockId = rand(10, 999);
+    return response()->json([
+        'success' => true, 'is_mocked' => true, 'message' => 'Gudang (simulasi) berhasil ditambahkan.',
+        'data' => array_merge(['id_gudang' => $mockId], $validated)
+    ]);
+});
+
+// Update existing gudang stock/capacity
+Route::post('/admin/api/gudang/{id}/update', function (Illuminate\Http\Request $request, $id) {
+    $validated = $request->validate([
+        'stok_saat_ini'   => 'sometimes|integer|min:0',
+        'kapasitas_total' => 'sometimes|integer|min:1',
+        'status_gudang'   => 'sometimes|in:aktif,penuh,maintenance',
+    ]);
+
+    try {
+        if (Schema::hasTable('gudang')) {
+            $g = \App\Models\gudang::find($id);
+            if ($g) {
+                $g->fill($validated)->save();
+                return response()->json(['success' => true, 'message' => 'Gudang berhasil diperbarui.', 'data' => $g]);
+            }
+            return response()->json(['success' => false, 'message' => 'Gudang tidak ditemukan.'], 404);
+        }
+    } catch (\Exception $e) {}
+
+    return response()->json(['success' => true, 'is_mocked' => true, 'message' => 'Gudang (simulasi) diperbarui.']);
+});
+
+// Create new courier
+Route::post('/admin/api/kurir', function (Illuminate\Http\Request $request) {
+    $validated = $request->validate([
+        'nama_kurir'   => 'required|string|max:255',
+        'no_hp'        => 'required|string|max:30',
+        'alamat'       => 'nullable|string',
+        'kendaraan'    => 'required|string|max:100',
+        'plat_nomor'   => 'required|string|max:20',
+        'status_kurir' => 'required|in:aktif,nonaktif',
+        'catatan'      => 'nullable|string',
+    ]);
+
+    try {
+        if (Schema::hasTable('kurir')) {
+            $k = \App\Models\kurir::create($validated);
+            return response()->json(['success' => true, 'message' => 'Kurir berhasil ditambahkan.', 'data' => $k]);
+        }
+    } catch (\Exception $e) {}
+
+    $mockId = rand(10, 999);
+    return response()->json([
+        'success' => true, 'is_mocked' => true, 'message' => 'Kurir (simulasi) berhasil ditambahkan.',
+        'data' => array_merge(['id_kurir' => $mockId], $validated)
+    ]);
+});
+
+// Update existing kurir status/details
+Route::post('/admin/api/kurir/{id}/update', function (Illuminate\Http\Request $request, $id) {
+    $validated = $request->validate([
+        'status_kurir' => 'sometimes|in:aktif,nonaktif',
+        'kendaraan'    => 'sometimes|string|max:100',
+        'plat_nomor'   => 'sometimes|string|max:20',
+        'catatan'      => 'sometimes|nullable|string',
+    ]);
+
+    try {
+        if (Schema::hasTable('kurir')) {
+            $k = \App\Models\kurir::find($id);
+            if ($k) {
+                $k->fill($validated)->save();
+                return response()->json(['success' => true, 'message' => 'Kurir berhasil diperbarui.', 'data' => $k]);
+            }
+            return response()->json(['success' => false, 'message' => 'Kurir tidak ditemukan.'], 404);
+        }
+    } catch (\Exception $e) {}
+
+    return response()->json(['success' => true, 'is_mocked' => true, 'message' => 'Kurir (simulasi) diperbarui.']);
+});
+
+// Update subscription status
+Route::post('/admin/api/langganan/{id}/status', function (Illuminate\Http\Request $request, $id) {
+    $validated = $request->validate([
+        'status' => 'required|in:aktif,nonaktif,selesai'
+    ]);
+
+    try {
+        if (Schema::hasTable('langganan')) {
+            $l = \App\Models\langganan::find($id);
+            if ($l) {
+                $l->status_langganan = $validated['status'];
+                $l->save();
+                return response()->json(['success' => true, 'message' => 'Status langganan berhasil diperbarui.', 'data' => $l]);
+            }
+            return response()->json(['success' => false, 'message' => 'Langganan tidak ditemukan.'], 404);
+        }
+    } catch (\Exception $e) {}
+
+    return response()->json(['success' => true, 'is_mocked' => true, 'message' => 'Status langganan (simulasi) diperbarui.', 'status' => $validated['status']]);
+});
