@@ -89,6 +89,12 @@
 
             const transaksi = initialData.transaksi || [];
             const langganan = initialData.langganan || [];
+            const stats = initialData.stats || {
+                total_pesanan: transaksi.length,
+                total_belanja: transaksi.reduce((sum, item) => sum + Number(item.total_bayar || 0), 0),
+                langganan_aktif: langganan.filter(item => String(item.status_langganan || '').toLowerCase() === 'aktif').length,
+                riwayat_terbaru: transaksi.slice(0, 5),
+            };
 
             const latestOrder = transaksi[0] || {
                 kode_invoice: 'INV-DEMO-001',
@@ -211,6 +217,56 @@
                             <button onClick={() => setActiveTab('tracking')} className={`pb-4 text-xs font-extrabold tracking-wider uppercase border-b-2 transition-all ${activeTab === 'tracking' ? 'border-sky-500 text-sky-500 font-black' : 'border-transparent text-slate-400 hover:text-slate-300'}`}>Lacak Pengiriman</button>
                             <button onClick={() => setActiveTab('history')} className={`pb-4 text-xs font-extrabold tracking-wider uppercase border-b-2 transition-all ${activeTab === 'history' ? 'border-sky-500 text-sky-500 font-black' : 'border-transparent text-slate-400 hover:text-slate-300'}`}>Riwayat Pesanan</button>
                             <button onClick={() => setActiveTab('subscription')} className={`pb-4 text-xs font-extrabold tracking-wider uppercase border-b-2 transition-all ${activeTab === 'subscription' ? 'border-sky-500 text-sky-500 font-black' : 'border-transparent text-slate-400 hover:text-slate-300'}`}>Jadwal Langganan</button>
+                        </div>
+
+                        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6">
+                            {[
+                                { label: 'Total Pesanan', value: stats.total_pesanan, icon: '🧾', tone: 'from-sky-500 to-cyan-400' },
+                                { label: 'Total Belanja', value: formatRupiah(stats.total_belanja), icon: '💸', tone: 'from-emerald-500 to-lime-400' },
+                                { label: 'Langganan Aktif', value: stats.langganan_aktif, icon: '💧', tone: 'from-violet-500 to-indigo-400' },
+                                { label: 'Riwayat Terbaru', value: stats.riwayat_terbaru.length, icon: '📦', tone: 'from-amber-400 to-orange-400' },
+                            ].map(card => (
+                                <article key={card.label} className="rounded-3xl border border-slate-200 dark:border-white/5 bg-white dark:bg-slate-900/70 p-5 shadow-sm hover:-translate-y-0.5 transition-all">
+                                    <div className="flex items-center justify-between">
+                                        <span className="text-[10px] uppercase tracking-[0.35em] text-slate-400">{card.label}</span>
+                                        <span className={`inline-flex h-10 w-10 items-center justify-center rounded-2xl bg-gradient-to-br ${card.tone} text-lg text-white shadow-lg`}>{card.icon}</span>
+                                    </div>
+                                    <p className="mt-4 text-2xl font-black text-slate-900 dark:text-white">{card.value}</p>
+                                </article>
+                            ))}
+                        </div>
+
+                        <div className="grid grid-cols-1 xl:grid-cols-[1.1fr_0.9fr] gap-6">
+                            <article className="rounded-3xl border border-slate-200 dark:border-white/5 bg-white dark:bg-slate-900/70 p-6 shadow-sm">
+                                <div className="flex items-center justify-between gap-3">
+                                    <div>
+                                        <p className="text-[10px] uppercase tracking-[0.35em] text-slate-400">Riwayat Pembelian</p>
+                                        <h4 className="mt-1 text-lg font-black text-slate-900 dark:text-white">5 pesanan terbaru</h4>
+                                    </div>
+                                    <button onClick={() => setActiveTab('history')} className="text-[10px] font-black uppercase tracking-[0.35em] text-sky-500">Lihat semua</button>
+                                </div>
+                                <div className="mt-5 space-y-3">
+                                    {stats.riwayat_terbaru.length === 0 ? (
+                                        <p className="rounded-2xl border border-dashed border-slate-200 dark:border-white/5 bg-slate-50 dark:bg-slate-950/50 p-4 text-xs text-slate-400">Belum ada riwayat pembelian.</p>
+                                    ) : stats.riwayat_terbaru.map(item => (
+                                        <div key={item.id_transaksi || item.kode_invoice} className="flex items-center justify-between rounded-2xl border border-slate-200 dark:border-white/5 bg-slate-50 dark:bg-slate-950/50 p-4">
+                                            <div>
+                                                <p className="text-xs font-black text-slate-800 dark:text-white">{item.kode_invoice}</p>
+                                                <p className="text-[10px] text-slate-400">{new Date(item.tanggal_transaksi || item.created_at).toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' })}</p>
+                                            </div>
+                                            <div className="text-right">
+                                                <p className="text-xs font-black text-sky-500">{formatRupiah(item.total_bayar)}</p>
+                                                <p className="text-[10px] uppercase tracking-[0.25em] text-slate-400">{item.status_transaksi}</p>
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            </article>
+                            <article className="rounded-3xl border border-emerald-400/20 bg-gradient-to-br from-emerald-400/10 via-slate-900 to-sky-500/10 p-6 shadow-sm">
+                                <p className="text-[10px] uppercase tracking-[0.35em] text-emerald-200">Tips Pesanan</p>
+                                <h4 className="mt-2 text-xl font-black text-white">Semua riwayat belanja Anda tersimpan rapi untuk cek ulang kapan saja.</h4>
+                                <p className="mt-3 text-xs text-slate-200">Setiap pembelian baru akan langsung muncul, jadi Anda bisa melihat total belanja dan status pengiriman tanpa membuka halaman lain.</p>
+                            </article>
                         </div>
 
                         {activeTab === 'tracking' && (

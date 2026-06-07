@@ -526,7 +526,14 @@ Route::get('/customer/dashboard', function () {
         ];
     }
 
-    return view('customer.dashboard', compact('customer', 'transaksi', 'langganan'));
+    $stats = [
+        'total_pesanan' => $transaksi ? $transaksi->count() : 0,
+        'total_belanja' => $transaksi ? $transaksi->sum('total_bayar') : 0,
+        'langganan_aktif' => $langganan ? $langganan->where('status_langganan', 'aktif')->count() : 0,
+        'riwayat_terbaru' => $transaksi ? $transaksi->take(5) : collect(),
+    ];
+
+    return view('customer.dashboard', compact('customer', 'transaksi', 'langganan', 'stats'));
 })->name('customer.dashboard');
 
 Route::get('/customer/beli', function () {
