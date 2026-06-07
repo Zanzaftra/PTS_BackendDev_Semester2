@@ -167,7 +167,9 @@ Route::post('/admin/login', function (Illuminate\Http\Request $request) {
         'password' => 'required|min:6'
     ]);
 
+    // 1. Check demo credentials
     if ($credentials['email'] === 'admin@rinduwater.com' && $credentials['password'] === 'admin123') {
+        session(['admin_logged_in' => true, 'admin_email' => $credentials['email']]);
         return response()->json([
             'success' => true,
             'message' => 'Login berhasil!',
@@ -175,11 +177,92 @@ Route::post('/admin/login', function (Illuminate\Http\Request $request) {
         ]);
     }
 
+    // 2. Check Database if migrated
+    try {
+        if (Schema::hasTable('admin')) {
+            $adminUser = \App\Models\admin::where('email', $credentials['email'])->first();
+            if ($adminUser) {
+                if (Hash::check($credentials['password'], $adminUser->password) || $credentials['password'] === $adminUser->password) {
+                    session([
+                        'admin_logged_in' => true, 
+                        'admin_id' => $adminUser->id_admin,
+                        'admin_name' => $adminUser->nama_admin,
+                        'admin_email' => $adminUser->email
+                    ]);
+                    return response()->json([
+                        'success' => true,
+                        'message' => 'Login berhasil!',
+                        'redirect' => route('admin.dashboard')
+                    ]);
+                }
+            }
+        }
+    } catch (\Exception $e) {
+        // Fail silently
+    }
+
     return response()->json([
         'success' => false,
         'message' => 'Email atau password salah.'
     ], 422);
 });
+
+Route::get('/admin/register', function () {
+    return view('register');
+})->name('admin.register');
+
+Route::post('/admin/register', function (Illuminate\Http\Request $request) {
+    $validated = $request->validate([
+        'nama_admin' => 'required|string|max:255',
+        'username' => 'required|string|max:255',
+        'email' => 'required|email|max:100',
+        'password' => 'required|string|min:6',
+        'no_hp' => 'nullable|string|max:15'
+    ]);
+
+    try {
+        if (Schema::hasTable('admin')) {
+            if (\App\Models\admin::where('email', $validated['email'])->exists()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Email sudah terdaftar.'
+                ], 422);
+            }
+            if (\App\Models\admin::where('username', $validated['username'])->exists()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Username sudah digunakan.'
+                ], 422);
+            }
+
+            \App\Models\admin::create([
+                'nama_admin' => $validated['nama_admin'],
+                'username' => $validated['username'],
+                'email' => $validated['email'],
+                'password' => Hash::make($validated['password']),
+                'no_hp' => $validated['no_hp'] ?? null,
+                'role' => 'staff',
+                'status_admin' => 'aktif'
+            ]);
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Pendaftaran admin berhasil! Silakan masuk.',
+                'redirect' => route('admin.login')
+            ]);
+        }
+    } catch (\Exception $e) {
+        // Fallback for mocked preview if DB fails
+    }
+
+    return response()->json([
+        'success' => true,
+        'is_mocked' => true,
+        'message' => 'Registrasi disimulasikan (Database belum aktif). Silakan login!',
+        'redirect' => route('admin.login')
+    ]);
+});
+
 
 Route::get('/admin/dashboard', function () {
     $stats = [
@@ -194,6 +277,7 @@ Route::get('/admin/dashboard', function () {
     $kurir = collect();
     $langganan = collect();
     $transaksi = collect();
+    $pelanggan = collect();
 
     try {
         if (Schema::hasTable('gudang')) {
@@ -208,16 +292,177 @@ Route::get('/admin/dashboard', function () {
         if (Schema::hasTable('transaksi')) {
             $stats['total_transaksi'] = \App\Models\transaksi::count();
             $stats['total_pendapatan'] = \App\Models\transaksi::where('status_transaksi', 'dibayar')->orWhere('status_transaksi', 'selesai')->sum('total_bayar');
-            $transaksi = \App\Models\transaksi::orderBy('created_at', 'desc')->take(10)->get();
+            $transaksi = \App\Models\transaksi::orderBy('created_at', 'desc')->get();
         }
         if (Schema::hasTable('langganan')) {
             $stats['langganan_aktif'] = \App\Models\langganan::where('status_langganan', 'aktif')->count();
-            // Fetch langganan along with the pelanggan and produk relations
             $langganan = \App\Models\langganan::all();
         }
+        if (Schema::hasTable('pelanggan')) {
+            $pelanggan = \App\Models\pelanggan::all();
+        }
     } catch (\Exception $e) {
-        // Fallback silently if DB is unconfigured or not migrated yet
+        // Fallback silently if DB is unconfigured
     }
 
-    return view('dashboard', compact('stats', 'gudang', 'kurir', 'langganan', 'transaksi'));
+    return view('dashboard', compact('stats', 'gudang', 'kurir', 'langganan', 'transaksi', 'pelanggan'));
 })->name('admin.dashboard');
+
+// ================= CUSTOMER PORTAL ROUTES =================
+
+Route::get('/customer/login', function () {
+    return view('customer.login');
+})->name('customer.login');
+
+Route::post('/customer/login', function (Illuminate\Http\Request $request) {
+    $validated = $request->validate([
+        'email' => 'required|email',
+        'password' => 'required|min:6'
+    ]);
+
+    try {
+        if (Schema::hasTable('pelanggan')) {
+            $pelanggan = \App\Models\pelanggan::where('email', $validated['email'])->first();
+            if ($pelanggan) {
+                if ($pelanggan->password && (Hash::check($validated['password'], $pelanggan->password) || $validated['password'] === $pelanggan->password)) {
+                    session([
+                        'customer_logged_in' => true,
+                        'customer_id' => $pelanggan->id_pelanggan,
+                        'customer_name' => $pelanggan->nama_pelanggan,
+                        'customer_email' => $pelanggan->email
+                    ]);
+                    return response()->json([
+                        'success' => true,
+                        'message' => 'Login berhasil!',
+                        'redirect' => route('customer.dashboard')
+                    ]);
+                }
+            }
+        }
+    } catch (\Exception $e) {
+        // Fail silently
+    }
+
+    // Demo fallback for preview
+    if (($validated['email'] === 'zaki@example.com' || $validated['email'] === 'customer@rinduwater.com') && $validated['password'] === 'customer123') {
+        session([
+            'customer_logged_in' => true,
+            'customer_id' => 1,
+            'customer_name' => 'Zaki Zulfikar',
+            'customer_email' => $validated['email']
+        ]);
+        return response()->json([
+            'success' => true,
+            'message' => 'Login demo berhasil!',
+            'redirect' => route('customer.dashboard')
+        ]);
+    }
+
+    return response()->json([
+        'success' => false,
+        'message' => 'Email atau password salah.'
+    ], 422);
+});
+
+Route::get('/customer/register', function () {
+    return view('customer.register');
+})->name('customer.register');
+
+Route::post('/customer/register', function (Illuminate\Http\Request $request) {
+    $validated = $request->validate([
+        'nama_pelanggan' => 'required|string|max:255',
+        'email' => 'required|email|max:100',
+        'password' => 'required|string|min:6',
+        'no_telepon' => 'required|string|max:20',
+        'alamat' => 'required|string',
+        'jenis_pelanggan' => 'required|in:individu,lembaga',
+        'nama_lembaga' => 'nullable|required_if:jenis_pelanggan,lembaga|string|max:255',
+        'penanggung_jawab' => 'nullable|string|max:255'
+    ]);
+
+    try {
+        if (Schema::hasTable('pelanggan')) {
+            if (\App\Models\pelanggan::where('email', $validated['email'])->exists()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Email sudah terdaftar.'
+                ], 422);
+            }
+            if (\App\Models\pelanggan::where('nama_pelanggan', $validated['nama_pelanggan'])->exists()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Nama pelanggan sudah digunakan.'
+                ], 422);
+            }
+
+            \App\Models\pelanggan::create([
+                'nama_pelanggan' => $validated['nama_pelanggan'],
+                'email' => $validated['email'],
+                'password' => Hash::make($validated['password']),
+                'no_telepon' => $validated['no_telepon'],
+                'alamat' => $validated['alamat'],
+                'jenis_pelanggan' => $validated['jenis_pelanggan'],
+                'nama_lembaga' => $validated['nama_lembaga'] ?? null,
+                'penanggung_jawab' => $validated['penanggung_jawab'] ?? $validated['nama_pelanggan'],
+                'tanggal_daftar' => now(),
+                'status_pelanggan' => 'aktif'
+            ]);
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Pendaftaran berhasil! Silakan masuk.',
+                'redirect' => route('customer.login')
+            ]);
+        }
+    } catch (\Exception $e) {
+        // Fallback for mocked preview if DB fails
+    }
+
+    return response()->json([
+        'success' => true,
+        'is_mocked' => true,
+        'message' => 'Registrasi pelanggan disimulasikan (Database belum aktif). Silakan login!',
+        'redirect' => route('customer.login')
+    ]);
+});
+
+Route::get('/customer/dashboard', function () {
+    if (!session('customer_logged_in')) {
+        return redirect()->route('customer.login');
+    }
+
+    $customerId = session('customer_id');
+    $customerEmail = session('customer_email');
+    
+    $customer = null;
+    $transaksi = collect();
+    $langganan = collect();
+
+    try {
+        if (Schema::hasTable('pelanggan')) {
+            $customer = \App\Models\pelanggan::find($customerId) ?? \App\Models\pelanggan::where('email', $customerEmail)->first();
+        }
+        if ($customer) {
+            $customerId = $customer->id_pelanggan;
+            if (Schema::hasTable('transaksi')) {
+                $transaksi = \App\Models\transaksi::where('id_pelanggan', $customerId)->orderBy('created_at', 'desc')->get();
+            }
+            if (Schema::hasTable('langganan')) {
+                $langganan = \App\Models\langganan::where('id_pelanggan', $customerId)->get();
+            }
+        }
+    } catch (\Exception $e) {
+        // Fallback silently if DB is unconfigured
+    }
+
+    return view('customer.dashboard', compact('customer', 'transaksi', 'langganan'));
+})->name('customer.dashboard');
+
+Route::post('/customer/logout', function () {
+    session()->forget(['customer_logged_in', 'customer_id', 'customer_name', 'customer_email']);
+    return response()->json([
+        'success' => true,
+        'redirect' => route('customer.login')
+    ]);
+})->name('customer.logout');
+

@@ -6,7 +6,7 @@ export default function Dashboard({ initialData }) {
     const [darkMode, setDarkMode] = useState(localStorage.getItem('darkMode') === 'true');
     const [adminDropdown, setAdminDropdown] = useState(false);
 
-    // Initial database data passed from Laravel Backend
+    // Dynamic data passed from Laravel Backend with fallbacks
     const stats = initialData?.stats || {
         gudang_aktif: 1,
         stok_total: 2500,
@@ -37,6 +37,11 @@ export default function Dashboard({ initialData }) {
         { id_transaksi: 3, nama_pelanggan: 'Bambang Tri', kode_invoice: 'INV-20260524-BBG', metode_pembayaran: 'tunai', total_bayar: 50000, status_transaksi: 'menunggu', tanggal_transaksi: '24 May 2026' }
     ];
 
+    const listPelanggan = initialData?.pelanggan || [
+        { id_pelanggan: 1, nama_pelanggan: 'Zaki Zulfikar', email: 'zaki@example.com', no_telepon: '081234567890', alamat: 'Jl. Raya Jagakarsa No. 12', jenis_pelanggan: 'individu', status_pelanggan: 'aktif' },
+        { id_pelanggan: 2, nama_pelanggan: 'PT Angkasa Makmur', email: 'info@angkasamaju.co.id', no_telepon: '021-880044', alamat: 'Kawasan Industri Pulogadung Blok C', jenis_pelanggan: 'lembaga', status_pelanggan: 'aktif' }
+    ];
+
     const toggleTheme = () => {
         const nextMode = !darkMode;
         setDarkMode(nextMode);
@@ -49,16 +54,43 @@ export default function Dashboard({ initialData }) {
     };
 
     const handleLogout = () => {
-        // Log out admin and redirect
         window.location.href = '/admin/login';
     };
+
+    // Filters
+    const filteredTransaksi = listTransaksi.filter(t => 
+        (t.nama_pelanggan || '').toLowerCase().includes(searchQuery.toLowerCase()) ||
+        (t.kode_invoice || '').toLowerCase().includes(searchQuery.toLowerCase()) ||
+        (t.metode_pembayaran || '').toLowerCase().includes(searchQuery.toLowerCase())
+    );
+
+    const filteredGudang = listGudang.filter(g => 
+        (g.nama_gudang || '').toLowerCase().includes(searchQuery.toLowerCase()) ||
+        (g.lokasi || '').toLowerCase().includes(searchQuery.toLowerCase())
+    );
+
+    const filteredKurir = listKurir.filter(k => 
+        (k.nama_kurir || '').toLowerCase().includes(searchQuery.toLowerCase()) ||
+        (k.kendaraan || '').toLowerCase().includes(searchQuery.toLowerCase())
+    );
+
+    const filteredLangganan = listLangganan.filter(l => 
+        (l.nama_pelanggan || '').toLowerCase().includes(searchQuery.toLowerCase()) ||
+        (l.email || '').toLowerCase().includes(searchQuery.toLowerCase())
+    );
+
+    const filteredPelanggan = listPelanggan.filter(p => 
+        (p.nama_pelanggan || '').toLowerCase().includes(searchQuery.toLowerCase()) ||
+        (p.email || '').toLowerCase().includes(searchQuery.toLowerCase()) ||
+        (p.alamat || '').toLowerCase().includes(searchQuery.toLowerCase())
+    );
 
     return (
         <div className={`min-h-screen flex transition-colors duration-500 ${darkMode ? 'dark bg-slate-950 text-slate-100' : 'bg-slate-50 text-slate-800'}`}>
             
             {/* 1. LEFT SIDEBAR NAVIGATION */}
             <aside className="w-64 bg-slate-900 text-slate-400 p-6 flex flex-col justify-between border-r border-white/5 shrink-0 hidden md:flex">
-                <div className="space-y-10">
+                <div className="space-y-8">
                     <div className="flex items-center gap-3">
                         <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-blue-600 to-sky-400 flex items-center justify-center text-white shadow-md">
                             <svg xmlns="http://www.w3.org/2000/svg" className="h-5.5 w-5.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
@@ -68,87 +100,80 @@ export default function Dashboard({ initialData }) {
                         <span className="text-lg font-black text-white tracking-tight">Rindu Water</span>
                     </div>
 
-                    <nav className="space-y-2">
-                        <span className="block text-[9px] font-bold text-slate-500 uppercase tracking-widest mb-4">Administrasi Menu</span>
+                    <nav className="space-y-1.5">
+                        <span className="block text-[9px] font-bold text-slate-500 uppercase tracking-widest mb-3">Administrasi Menu</span>
                         
-                        {/* Overview Tab Button */}
                         <button 
                             onClick={() => { setActiveTab('overview'); setSearchQuery(''); }}
-                            className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-xs font-bold transition-all ${activeTab === 'overview' ? 'bg-blue-600 text-white shadow-md shadow-blue-500/10' : 'hover:text-white hover:bg-white/5'}`}
+                            className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-xl text-xs font-bold transition-all ${activeTab === 'overview' ? 'bg-blue-600 text-white shadow-md' : 'hover:text-white hover:bg-white/5'}`}
                         >
-                            <span className="text-base">📊</span>
-                            <span>Ikhtisar Data</span>
+                            <span>📊</span> <span>Ikhtisar Data</span>
                         </button>
 
-                        {/* Gudang Tab Button */}
+                        <button 
+                            onClick={() => { setActiveTab('transaksi'); setSearchQuery(''); }}
+                            className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-xl text-xs font-bold transition-all ${activeTab === 'transaksi' ? 'bg-blue-600 text-white shadow-md' : 'hover:text-white hover:bg-white/5'}`}
+                        >
+                            <span>💸</span> <span>Daftar Transaksi</span>
+                        </button>
+
+                        <button 
+                            onClick={() => { setActiveTab('pelanggan'); setSearchQuery(''); }}
+                            className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-xl text-xs font-bold transition-all ${activeTab === 'pelanggan' ? 'bg-blue-600 text-white shadow-md' : 'hover:text-white hover:bg-white/5'}`}
+                        >
+                            <span>👥</span> <span>Kelola Pelanggan</span>
+                        </button>
+
                         <button 
                             onClick={() => { setActiveTab('gudang'); setSearchQuery(''); }}
-                            className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-xs font-bold transition-all ${activeTab === 'gudang' ? 'bg-blue-600 text-white shadow-md shadow-blue-500/10' : 'hover:text-white hover:bg-white/5'}`}
+                            className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-xl text-xs font-bold transition-all ${activeTab === 'gudang' ? 'bg-blue-600 text-white shadow-md' : 'hover:text-white hover:bg-white/5'}`}
                         >
-                            <span className="text-base">🏬</span>
-                            <span>Stok Gudang</span>
+                            <span>🏬</span> <span>Stok Gudang</span>
                         </button>
 
-                        {/* Kurir Tab Button */}
                         <button 
                             onClick={() => { setActiveTab('kurir'); setSearchQuery(''); }}
-                            className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-xs font-bold transition-all ${activeTab === 'kurir' ? 'bg-blue-600 text-white shadow-md shadow-blue-500/10' : 'hover:text-white hover:bg-white/5'}`}
+                            className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-xl text-xs font-bold transition-all ${activeTab === 'kurir' ? 'bg-blue-600 text-white shadow-md' : 'hover:text-white hover:bg-white/5'}`}
                         >
-                            <span className="text-base">🛵</span>
-                            <span>Kelola Kurir</span>
+                            <span>🛵</span> <span>Kelola Kurir</span>
                         </button>
 
-                        {/* Langganan Tab Button */}
                         <button 
                             onClick={() => { setActiveTab('langganan'); setSearchQuery(''); }}
-                            className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-xs font-bold transition-all ${activeTab === 'langganan' ? 'bg-blue-600 text-white shadow-md shadow-blue-500/10' : 'hover:text-white hover:bg-white/5'}`}
+                            className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-xl text-xs font-bold transition-all ${activeTab === 'langganan' ? 'bg-blue-600 text-white shadow-md' : 'hover:text-white hover:bg-white/5'}`}
                         >
-                            <span className="text-base">💧</span>
-                            <span>Langganan Air</span>
+                            <span>💧</span> <span>Jadwal Langganan</span>
                         </button>
                     </nav>
                 </div>
 
-                <div className="pt-6 border-t border-white/5 space-y-4">
-                    <div className="flex items-center gap-3">
-                        <div className="w-8 h-8 rounded-full bg-slate-800 border border-white/10 flex items-center justify-center font-bold text-xs text-white">A</div>
-                        <div>
-                            <span className="block text-xs font-bold text-white leading-none">Super Admin</span>
-                            <span class="text-[9px] text-slate-500">admin@rinduwater.com</span>
-                        </div>
-                    </div>
+                <div className="pt-6 border-t border-white/5">
                     <button 
-                        onClick={handleLogout} 
-                        className="w-full py-2.5 bg-white/5 hover:bg-rose-500/10 text-rose-400 hover:text-rose-300 rounded-xl text-[10px] font-bold tracking-widest uppercase transition"
+                        onClick={handleLogout}
+                        className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-xs font-bold text-rose-400 hover:text-rose-300 hover:bg-rose-500/10 transition-all"
                     >
-                        Keluar Portal
+                        <span>🔐</span> <span>Keluar Portal</span>
                     </button>
                 </div>
             </aside>
 
-            {/* 2. MAIN APPLICATION CONTENT AREA */}
+            {/* 2. MAIN CONTENT AREA */}
             <main className="flex-1 flex flex-col min-w-0">
-                {/* TOP NAVBAR */}
-                <header className="py-4 px-6 md:px-8 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between gap-4">
-                    <div className="flex items-center gap-4 flex-1">
-                        {/* Search bar inside header */}
-                        <div className="relative max-w-sm w-full">
-                            <input 
-                                type="text"
-                                value={searchQuery}
-                                onChange={(e) => setSearchQuery(e.target.value)}
-                                placeholder="Cari data pelanggan, invoice, atau kurir..." 
-                                className="w-full pl-10 pr-4 py-2 bg-white dark:bg-slate-900 border border-slate-250 dark:border-slate-800 rounded-xl text-xs focus:outline-none focus:border-blue-500 transition shadow-inner dark:text-white"
-                            />
-                            <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-xs">🔍</span>
-                        </div>
-                    </div>
+                {/* TOPBAR HEADER */}
+                <header className="px-8 py-5 flex items-center justify-between border-b border-slate-200 dark:border-white/5 relative z-20 bg-white dark:bg-slate-950/20 backdrop-blur-md">
+                    <h1 className="text-lg font-black tracking-tight text-slate-800 dark:text-white uppercase">
+                        {activeTab === 'overview' && 'Ikhtisar Portal'}
+                        {activeTab === 'transaksi' && 'Semua Transaksi'}
+                        {activeTab === 'pelanggan' && 'Manajemen Pelanggan'}
+                        {activeTab === 'gudang' && 'Manajemen Gudang'}
+                        {activeTab === 'kurir' && 'Manajemen Armada'}
+                        {activeTab === 'langganan' && 'Paket Langganan'}
+                    </h1>
 
                     <div className="flex items-center gap-4">
-                        {/* Dark Mode toggle switch in header */}
                         <button 
                             onClick={toggleTheme} 
-                            className="p-2 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-350 shadow-sm hover:scale-105 transition"
+                            className="p-2.5 rounded-xl border border-slate-250 dark:border-white/10 hover:bg-slate-100 dark:hover:bg-white/5 transition"
                         >
                             {darkMode ? '☀️' : '🌙'}
                         </button>
@@ -156,98 +181,125 @@ export default function Dashboard({ initialData }) {
                         <div className="relative">
                             <button 
                                 onClick={() => setAdminDropdown(!adminDropdown)}
-                                className="flex items-center gap-2.5 px-3 py-1.5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl text-xs font-semibold shadow-sm"
+                                className="flex items-center gap-3 p-1.5 pr-4 rounded-xl border border-slate-250 dark:border-white/10 hover:bg-slate-100 dark:hover:bg-white/5 transition"
                             >
-                                <span className="w-2 h-2 rounded-full bg-emerald-500"></span>
-                                <span>Super Admin</span>
+                                <div className="w-8 h-8 rounded-lg bg-blue-600 flex items-center justify-center text-white font-black text-xs">
+                                    AD
+                                </div>
+                                <span className="text-xs font-bold hidden sm:inline text-slate-700 dark:text-slate-200">Administrator</span>
                             </button>
-                            
+
                             {adminDropdown && (
-                                <div className="absolute right-0 mt-2 w-48 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl shadow-xl p-2 space-y-1 z-15 text-xs">
-                                    <button onClick={handleLogout} className="w-full text-left px-3 py-2 text-rose-500 hover:bg-rose-500/10 rounded-lg font-bold">Keluar Portal</button>
+                                <div className="absolute right-0 mt-2 w-48 bg-white dark:bg-slate-900 border border-slate-200 dark:border-white/10 rounded-xl shadow-xl py-2 z-50 animate-fadeIn">
+                                    <button 
+                                        onClick={handleLogout}
+                                        className="w-full text-left px-4 py-2.5 text-xs text-rose-500 hover:bg-slate-50 dark:hover:bg-white/5 font-bold transition"
+                                    >
+                                        Log Out Portal
+                                    </button>
                                 </div>
                             )}
                         </div>
                     </div>
                 </header>
 
-                {/* DYNAMIC SCROLL CONTAINER */}
-                <div className="flex-1 p-6 md:p-8 overflow-y-auto space-y-8">
-                    
-                    {/* TAB OVERVIEW */}
+                {/* DASHBOARD BODY */}
+                <div className="p-8 space-y-8 overflow-y-auto max-h-[calc(100vh-80px)]">
+                    {/* SEARCH & FILTERS */}
+                    <div className="flex flex-col sm:flex-row gap-4 justify-between items-center bg-white dark:bg-slate-900/55 p-4 rounded-2xl border border-slate-200 dark:border-white/5">
+                        <div className="relative w-full sm:max-w-md">
+                            <span className="absolute left-4 top-1/2 -translate-y-1/2 text-sm opacity-55">🔍</span>
+                            <input 
+                                type="text" 
+                                value={searchQuery}
+                                onChange={(e) => setSearchQuery(e.target.value)}
+                                placeholder={`Cari di tab ${activeTab}...`} 
+                                className="w-full pl-10 pr-4 py-2.5 bg-slate-50 dark:bg-slate-950/60 border border-slate-250 dark:border-white/10 rounded-xl text-xs focus:outline-none focus:border-blue-500 transition"
+                            />
+                        </div>
+                        <div className="flex flex-wrap gap-1">
+                            {['overview', 'transaksi', 'pelanggan', 'gudang', 'kurir', 'langganan'].map(tab => (
+                                <button 
+                                    key={tab}
+                                    onClick={() => { setActiveTab(tab); setSearchQuery(''); }}
+                                    className={`px-3 py-1.5 rounded-lg text-[9px] font-extrabold tracking-wider uppercase border transition ${activeTab === tab ? 'bg-blue-600 border-blue-600 text-white' : 'border-slate-200 dark:border-white/5'}`}
+                                >
+                                    {tab === 'overview' ? 'Ikhtisar' : tab}
+                                </button>
+                            ))}
+                        </div>
+                    </div>
+
+                    {/* 1. OVERVIEW TAB */}
                     {activeTab === 'overview' && (
                         <div className="space-y-8 animate-fadeIn">
-                            <div className="space-y-2">
-                                <h2 className="text-2xl font-black tracking-tight text-slate-900 dark:text-white">Selamat Datang di Portal Admin 📊</h2>
-                                <p className="text-xs text-slate-500 dark:text-slate-400 font-light">Berikut adalah ringkasan perkembangan bisnis Rindu Water Anda hari ini.</p>
-                            </div>
-
-                            {/* Stat Grid List */}
                             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-                                <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-6 rounded-3xl shadow-sm space-y-3 hover:scale-[1.01] transition-all">
-                                    <div className="flex items-center justify-between">
-                                        <span className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest">Akumulasi Pendapatan</span>
-                                        <span className="text-xl">💰</span>
+                                <div className="bg-white dark:bg-slate-900/50 p-6 rounded-3xl border border-slate-200 dark:border-white/5 space-y-3 shadow-sm hover:scale-[1.01] transition-all">
+                                    <div className="flex justify-between items-center">
+                                        <span className="text-xs font-bold text-slate-400 uppercase tracking-widest">Pendapatan</span>
+                                        <span className="p-2 bg-emerald-500/10 text-emerald-500 rounded-xl text-lg">💰</span>
                                     </div>
-                                    <span className="block text-2xl font-black text-blue-600 dark:text-blue-400">{formatRupiah(stats.total_pendapatan)}</span>
+                                    <h3 className="text-2xl font-black text-slate-800 dark:text-white tracking-tight">{formatRupiah(stats.total_pendapatan)}</h3>
+                                    <p className="text-[10px] text-slate-400">Total penjualan terbayar</p>
                                 </div>
 
-                                <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-6 rounded-3xl shadow-sm space-y-3 hover:scale-[1.01] transition-all">
-                                    <div className="flex items-center justify-between">
-                                        <span className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest">Jumlah Transaksi</span>
-                                        <span className="text-xl">💳</span>
+                                <div className="bg-white dark:bg-slate-900/50 p-6 rounded-3xl border border-slate-200 dark:border-white/5 space-y-3 shadow-sm hover:scale-[1.01] transition-all">
+                                    <div className="flex justify-between items-center">
+                                        <span className="text-xs font-bold text-slate-400 uppercase tracking-widest">Transaksi</span>
+                                        <span className="p-2 bg-blue-500/10 text-blue-500 rounded-xl text-lg">📦</span>
                                     </div>
-                                    <span className="block text-2xl font-black text-slate-850 dark:text-white">{stats.total_transaksi} Kali</span>
+                                    <h3 className="text-2xl font-black text-slate-800 dark:text-white tracking-tight">{stats.total_transaksi} Order</h3>
+                                    <p className="text-[10px] text-slate-400">Terdaftar di database</p>
                                 </div>
 
-                                <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-6 rounded-3xl shadow-sm space-y-3 hover:scale-[1.01] transition-all">
-                                    <div className="flex items-center justify-between">
-                                        <span className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest">Langganan Aktif</span>
-                                        <span className="text-xl">💧</span>
+                                <div className="bg-white dark:bg-slate-900/50 p-6 rounded-3xl border border-slate-200 dark:border-white/5 space-y-3 shadow-sm hover:scale-[1.01] transition-all">
+                                    <div className="flex justify-between items-center">
+                                        <span className="text-xs font-bold text-slate-400 uppercase tracking-widest">Stok Gudang</span>
+                                        <span className="p-2 bg-sky-500/10 text-sky-500 rounded-xl text-lg">🏬</span>
                                     </div>
-                                    <span className="block text-2xl font-black text-teal-500 dark:text-teal-400">{stats.langganan_aktif} Paket</span>
+                                    <h3 className="text-2xl font-black text-slate-800 dark:text-white tracking-tight">{stats.stok_total} Galon</h3>
+                                    <p className="text-[10px] text-slate-400">Dari {stats.gudang_aktif} unit aktif</p>
                                 </div>
 
-                                <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-6 rounded-3xl shadow-sm space-y-3 hover:scale-[1.01] transition-all">
-                                    <div className="flex items-center justify-between">
-                                        <span className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest">Volume Stok Total</span>
-                                        <span className="text-xl">🏬</span>
+                                <div className="bg-white dark:bg-slate-900/50 p-6 rounded-3xl border border-slate-200 dark:border-white/5 space-y-3 shadow-sm hover:scale-[1.01] transition-all">
+                                    <div className="flex justify-between items-center">
+                                        <span className="text-xs font-bold text-slate-400 uppercase tracking-widest">Langganan</span>
+                                        <span className="p-2 bg-indigo-500/10 text-indigo-500 rounded-xl text-lg">💧</span>
                                     </div>
-                                    <span className="block text-2xl font-black text-indigo-500 dark:text-indigo-400">{stats.stok_total} Pcs</span>
+                                    <h3 className="text-2xl font-black text-slate-800 dark:text-white tracking-tight">{stats.langganan_aktif} Paket</h3>
+                                    <p className="text-[10px] text-slate-400">Langganan aktif diantarkan</p>
                                 </div>
                             </div>
 
-                            {/* Recent Transactions Table */}
-                            <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl shadow-sm overflow-hidden">
-                                <div className="px-6 py-5 border-b border-slate-200 dark:border-slate-800 flex justify-between items-center gap-4">
-                                    <h3 className="text-sm font-black text-slate-800 dark:text-white">10 Transaksi Terakhir</h3>
-                                    <span className="text-[10px] font-bold text-blue-600 dark:text-blue-400 uppercase tracking-wide">Pembaruan Berjalan</span>
+                            {/* Recent Table */}
+                            <div className="bg-white dark:bg-slate-900/50 rounded-3xl border border-slate-200 dark:border-white/5 p-6 space-y-6 shadow-sm">
+                                <div className="flex justify-between items-center">
+                                    <h3 className="text-sm font-black text-slate-800 dark:text-white uppercase tracking-wider">Antrian Transaksi Terakhir</h3>
+                                    <button onClick={() => setActiveTab('transaksi')} className="text-xs font-bold text-blue-500 hover:underline">Lihat Semua →</button>
                                 </div>
                                 <div className="overflow-x-auto">
-                                    <table className="w-full text-left text-xs text-slate-600 dark:text-slate-400">
-                                        <thead className="bg-slate-50 dark:bg-slate-800/40 text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider">
-                                            <tr>
-                                                <th className="py-4.5 px-6">Pelanggan</th>
-                                                <th className="py-4.5 px-6">Kode Invoice</th>
-                                                <th className="py-4.5 px-6">Metode</th>
-                                                <th className="py-4.5 px-6">Total Bayar</th>
-                                                <th className="py-4.5 px-6">Status</th>
-                                                <th className="py-4.5 px-6">Tanggal</th>
+                                    <table className="w-full text-left text-xs">
+                                        <thead>
+                                            <tr className="border-b border-slate-200 dark:border-white/5 text-slate-400 font-bold uppercase tracking-wider">
+                                                <th className="py-4">Invoice</th>
+                                                <th className="py-4">Pelanggan</th>
+                                                <th className="py-4">Metode</th>
+                                                <th className="py-4">Total</th>
+                                                <th className="py-4">Status</th>
                                             </tr>
                                         </thead>
-                                        <tbody className="divide-y divide-slate-150 dark:divide-slate-800">
-                                            {listTransaksi.map((tr) => (
-                                                <tr key={tr.id_transaksi} className="hover:bg-slate-50/50 dark:hover:bg-slate-800/20">
-                                                    <td className="py-4.5 px-6 font-extrabold text-slate-850 dark:text-white">{tr.nama_pelanggan}</td>
-                                                    <td className="py-4.5 px-6 font-semibold uppercase">{tr.kode_invoice}</td>
-                                                    <td className="py-4.5 px-6 uppercase">{tr.metode_pembayaran}</td>
-                                                    <td className="py-4.5 px-6 font-extrabold text-blue-600 dark:text-blue-400">{formatRupiah(tr.total_bayar)}</td>
-                                                    <td className="py-4.5 px-6">
-                                                        <span className={`inline-block px-2.5 py-0.5 rounded-full text-[9px] font-bold uppercase ${tr.status_transaksi === 'selesai' ? 'bg-emerald-500/10 text-emerald-500' : (tr.status_transaksi === 'dibayar' ? 'bg-blue-500/10 text-blue-500' : 'bg-amber-500/10 text-amber-500')}`}>
-                                                            {tr.status_transaksi}
+                                        <tbody className="divide-y divide-slate-100 dark:divide-white/5 font-medium">
+                                            {filteredTransaksi.slice(0, 5).map(t => (
+                                                <tr key={t.id_transaksi} className="hover:bg-slate-50 dark:hover:bg-white/5 transition">
+                                                    <td className="py-4 font-bold text-blue-500">{t.kode_invoice}</td>
+                                                    <td className="py-4">{t.nama_pelanggan}</td>
+                                                    <td className="py-4 uppercase">{t.metode_pembayaran}</td>
+                                                    <td className="py-4 font-bold">{formatRupiah(t.total_bayar)}</td>
+                                                    <td className="py-4">
+                                                        <span className={`px-2.5 py-1 rounded-lg text-[10px] font-bold uppercase ${t.status_transaksi === 'selesai' || t.status_transaksi === 'dibayar' ? 'bg-emerald-500/10 text-emerald-500' : 'bg-amber-500/10 text-amber-500'}`}>
+                                                            {t.status_transaksi}
                                                         </span>
                                                     </td>
-                                                    <td className="py-4.5 px-6 font-light">{tr.tanggal_transaksi}</td>
                                                 </tr>
                                             ))}
                                         </tbody>
@@ -257,152 +309,203 @@ export default function Dashboard({ initialData }) {
                         </div>
                     )}
 
-                    {/* TAB GUDANG */}
+                    {/* 2. TRANSAKSI TAB */}
+                    {activeTab === 'transaksi' && (
+                        <div className="bg-white dark:bg-slate-900/50 rounded-3xl border border-slate-200 dark:border-white/5 p-6 space-y-6 shadow-sm animate-fadeIn">
+                            <h3 className="text-sm font-black text-slate-800 dark:text-white uppercase tracking-wider">Manajemen Semua Pembayaran & Transaksi</h3>
+                            <div className="overflow-x-auto">
+                                <table className="w-full text-left text-xs">
+                                    <thead>
+                                        <tr className="border-b border-slate-200 dark:border-white/5 text-slate-400 font-bold uppercase tracking-wider">
+                                            <th className="py-4">Invoice</th>
+                                            <th className="py-4">Nama Pelanggan</th>
+                                            <th className="py-4">Tanggal Pesanan</th>
+                                            <th className="py-4">Metode</th>
+                                            <th className="py-4">Total Bayar</th>
+                                            <th className="py-4">Status Pengiriman</th>
+                                            <th className="py-4">Aksi</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody className="divide-y divide-slate-100 dark:divide-white/5 font-medium">
+                                        {filteredTransaksi.map(t => (
+                                            <tr key={t.id_transaksi} className="hover:bg-slate-50 dark:hover:bg-white/5 transition">
+                                                <td className="py-4 font-bold text-blue-500">{t.kode_invoice}</td>
+                                                <td className="py-4">{t.nama_pelanggan}</td>
+                                                <td className="py-4">{new Date(t.tanggal_transaksi || t.created_at).toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' })}</td>
+                                                <td className="py-4 uppercase">{t.metode_pembayaran}</td>
+                                                <td className="py-4 font-bold">{formatRupiah(t.total_bayar)}</td>
+                                                <td className="py-4">
+                                                    <span className={`px-2.5 py-1 rounded-lg text-[10px] font-bold uppercase ${t.status_transaksi === 'selesai' || t.status_transaksi === 'dibayar' ? 'bg-emerald-500/10 text-emerald-500' : 'bg-amber-500/10 text-amber-500'}`}>
+                                                        {t.status_transaksi}
+                                                    </span>
+                                                </td>
+                                                <td className="py-4">
+                                                    <select 
+                                                        value={t.status_transaksi}
+                                                        onChange={(e) => {
+                                                            alert(`Status transaksi ${t.kode_invoice} berhasil diperbarui menjadi ${e.target.value}!`);
+                                                            t.status_transaksi = e.target.value;
+                                                            setActiveTab('transaksi'); // refresh UI
+                                                        }}
+                                                        className="px-2 py-1 bg-slate-100 dark:bg-slate-950 border border-slate-200 dark:border-white/5 rounded-lg text-[10px] font-bold focus:outline-none"
+                                                    >
+                                                        <option value="menunggu">Menunggu</option>
+                                                        <option value="dibayar">Dibayar</option>
+                                                        <option value="diproses">Diproses</option>
+                                                        <option value="dikirim">Dikirim</option>
+                                                        <option value="selesai">Selesai</option>
+                                                        <option value="batal">Batal</option>
+                                                    </select>
+                                                </td>
+                                            </tr>
+                                        ))}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    )}
+
+                    {/* 3. PELANGGAN TAB */}
+                    {activeTab === 'pelanggan' && (
+                        <div className="bg-white dark:bg-slate-900/50 rounded-3xl border border-slate-200 dark:border-white/5 p-6 space-y-6 shadow-sm animate-fadeIn">
+                            <h3 className="text-sm font-black text-slate-800 dark:text-white uppercase tracking-wider">Manajemen Pelanggan Terdaftar</h3>
+                            <div className="overflow-x-auto">
+                                <table className="w-full text-left text-xs">
+                                    <thead>
+                                        <tr className="border-b border-slate-200 dark:border-white/5 text-slate-400 font-bold uppercase tracking-wider">
+                                            <th className="py-4">ID</th>
+                                            <th className="py-4">Nama Pelanggan</th>
+                                            <th className="py-4">Tipe</th>
+                                            <th className="py-4">Kontak</th>
+                                            <th className="py-4">Alamat Rumah/Lembaga</th>
+                                            <th className="py-4">Status</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody className="divide-y divide-slate-100 dark:divide-white/5 font-medium">
+                                        {filteredPelanggan.map(p => (
+                                            <tr key={p.id_pelanggan} className="hover:bg-slate-50 dark:hover:bg-white/5 transition">
+                                                <td className="py-4 text-slate-400 font-bold">#{p.id_pelanggan}</td>
+                                                <td className="py-4 font-bold">{p.nama_pelanggan}</td>
+                                                <td className="py-4">
+                                                    <span className={`px-2 py-0.5 rounded text-[9px] font-bold uppercase ${p.jenis_pelanggan === 'lembaga' ? 'bg-indigo-500/10 text-indigo-500' : 'bg-blue-500/10 text-blue-500'}`}>
+                                                        {p.jenis_pelanggan}
+                                                    </span>
+                                                </td>
+                                                <td className="py-4">
+                                                    <div className="space-y-0.5">
+                                                        <span className="block font-semibold">{p.email}</span>
+                                                        <span className="block text-[10px] text-slate-450">{p.no_telepon}</span>
+                                                    </div>
+                                                </td>
+                                                <td className="py-4 truncate max-w-[200px]">{p.alamat}</td>
+                                                <td className="py-4">
+                                                    <span className="px-2.5 py-1 bg-emerald-500/10 text-emerald-500 text-[10px] font-bold rounded-lg uppercase">
+                                                        {p.status_pelanggan || 'aktif'}
+                                                    </span>
+                                                </td>
+                                            </tr>
+                                        ))}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    )}
+
+                    {/* 4. GUDANG TAB */}
                     {activeTab === 'gudang' && (
-                        <div className="space-y-8 animate-fadeIn">
-                            <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-6">
-                                <div className="space-y-2">
-                                    <h2 className="text-2xl font-black tracking-tight text-slate-900 dark:text-white">Inventori Stok Gudang 🏬</h2>
-                                    <p class="text-xs text-slate-500 dark:text-slate-400 font-light">Pantau penempatan stok air dan kapasitas sisa gudang secara real-time.</p>
-                                </div>
-                                <button className="px-5 py-3 bg-blue-600 hover:bg-blue-750 text-white rounded-xl text-xs font-bold tracking-wide transition shadow-md shrink-0">Tambah Gudang</button>
-                            </div>
-
-                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                                {listGudang.filter(g => g.nama_gudang.toLowerCase().includes(searchQuery.toLowerCase())).map((gd) => {
-                                    const percentage = Math.round((gd.stok_saat_ini / gd.kapasitas_total) * 100);
-                                    return (
-                                        <div key={gd.id_gudang} className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-6 shadow-sm space-y-6 hover:scale-[1.01] transition-all">
-                                            <div className="flex justify-between items-start">
-                                                <div>
-                                                    <h3 className="text-base font-extrabold text-slate-800 dark:text-white leading-tight">{gd.nama_gudang}</h3>
-                                                    <span className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">{gd.lokasi}</span>
-                                                </div>
-                                                <span className={`px-2.5 py-0.5 rounded-full text-[9px] font-bold uppercase ${gd.status_gudang === 'aktif' ? 'bg-emerald-500/10 text-emerald-500' : 'bg-rose-500/10 text-rose-500'}`}>
-                                                    {gd.status_gudang}
-                                                </span>
-                                            </div>
-
-                                            {/* Stock progress capacity bar */}
-                                            <div className="space-y-2">
-                                                <div class="flex justify-between text-xs font-semibold text-slate-500">
-                                                    <span>Kapasitas Terisi</span>
-                                                    <span>{percentage}% ({gd.stok_saat_ini} / {gd.kapasitas_total} Pcs)</span>
-                                                </div>
-                                                <div className="w-full h-2 bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden">
-                                                    <div className="h-full bg-blue-500 rounded-full transition-all duration-1000" style={{ width: `${percentage}%` }}></div>
-                                                </div>
-                                            </div>
-
-                                            <div className="grid grid-cols-2 gap-4 text-xs border-t border-slate-100 dark:border-slate-800 pt-4">
-                                                <div>
-                                                    <span className="block text-[9px] font-bold text-slate-400 uppercase tracking-widest">Kapasitas Sisa</span>
-                                                    <span className="block text-sm font-extrabold text-slate-850 dark:text-white">{gd.kapasitas_total - gd.stok_saat_ini} Pcs</span>
-                                                </div>
-                                                <div>
-                                                    <span className="block text-[9px] font-bold text-slate-400 uppercase tracking-widest">Terakhir Input</span>
-                                                    <span className="block text-sm font-extrabold text-slate-850 dark:text-white">Hari Ini</span>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    );
-                                })}
-                            </div>
-                        </div>
-                    )}
-
-                    {/* TAB KURIR */}
-                    {activeTab === 'kurir' && (
-                        <div className="space-y-8 animate-fadeIn">
-                            <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-6">
-                                <div className="space-y-2">
-                                    <h2 className="text-2xl font-black tracking-tight text-slate-900 dark:text-white">Armada Kurir Pengantar 🛵</h2>
-                                    <p className="text-xs text-slate-500 dark:text-slate-400 font-light">Status aktifitas tugas kurir pendistribusian air mineral Rindu Water.</p>
-                                </div>
-                                <button className="px-5 py-3 bg-blue-600 hover:bg-blue-750 text-white rounded-xl text-xs font-bold tracking-wide transition shadow-md shrink-0">Daftarkan Kurir</button>
-                            </div>
-
-                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                                {listKurir.filter(k => k.nama_kurir.toLowerCase().includes(searchQuery.toLowerCase())).map((kr) => (
-                                    <div key={kr.id_kurir} className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-6 shadow-sm flex flex-col justify-between space-y-6 hover:scale-[1.01] transition-all">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 animate-fadeIn">
+                            {filteredGudang.map(g => {
+                                const pct = Math.min(100, Math.round((g.stok_saat_ini / g.kapasitas_total) * 100));
+                                return (
+                                    <div key={g.id_gudang} className="bg-white dark:bg-slate-900/50 p-6 rounded-3xl border border-slate-200 dark:border-white/5 space-y-4">
                                         <div className="flex justify-between items-start">
-                                            <div className="flex items-center gap-4">
-                                                <div className="w-12 h-12 rounded-2xl bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 flex items-center justify-center font-extrabold text-base shadow-sm">👤</div>
-                                                <div>
-                                                    <h3 className="text-base font-extrabold text-slate-800 dark:text-white leading-tight">{kr.nama_kurir}</h3>
-                                                    <span className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">{kr.no_hp}</span>
-                                                </div>
+                                            <div>
+                                                <span className="px-2 py-0.5 rounded text-[8px] bg-blue-500/10 text-blue-500 font-black uppercase tracking-wider">UNIT {g.id_gudang}</span>
+                                                <h3 className="text-base font-black text-slate-800 dark:text-white mt-1">{g.nama_gudang}</h3>
+                                                <p className="text-[10px] text-slate-400">{g.lokasi}</p>
                                             </div>
-                                            <span className={`px-2.5 py-0.5 rounded-full text-[9px] font-bold uppercase ${kr.status_kurir === 'aktif' ? 'bg-emerald-500/10 text-emerald-500' : 'bg-slate-500/10 text-slate-500'}`}>
-                                                {kr.status_kurir}
-                                            </span>
+                                            <span className="px-2.5 py-1 bg-emerald-500/10 text-emerald-500 text-[10px] font-bold rounded-lg uppercase">{g.status_gudang}</span>
                                         </div>
-
-                                        <div className="grid grid-cols-2 gap-4 text-xs border-t border-slate-100 dark:border-slate-800 pt-4 bg-slate-50/50 dark:bg-slate-900/30 p-4 rounded-2xl border">
-                                            <div>
-                                                <span className="block text-[8px] font-bold text-slate-400 uppercase tracking-widest mb-0.5">Kendaraan</span>
-                                                <span className="block text-xs font-bold text-slate-700 dark:text-slate-350">{kr.kendaraan}</span>
+                                        <div className="space-y-2">
+                                            <div className="flex justify-between text-xs font-bold text-slate-400">
+                                                <span>Kapasitas ({pct}%)</span>
+                                                <span>{g.stok_saat_ini} / {g.kapasitas_total} Galon</span>
                                             </div>
-                                            <div>
-                                                <span className="block text-[8px] font-bold text-slate-400 uppercase tracking-widest mb-0.5">Plat Nomor</span>
-                                                <span className="block text-xs font-bold text-slate-700 dark:text-slate-200 font-mono uppercase bg-white dark:bg-slate-850 px-2 py-0.5 rounded border border-slate-150 inline-block">{kr.plat_nomor}</span>
+                                            <div className="w-full h-2 bg-slate-100 dark:bg-slate-950 rounded-full overflow-hidden">
+                                                <div className="h-full bg-blue-600 rounded-full" style={{ width: `${pct}%` }}></div>
                                             </div>
                                         </div>
                                     </div>
-                                ))}
-                            </div>
+                                );
+                            })}
                         </div>
                     )}
 
-                    {/* TAB LANGGANAN */}
+                    {/* 5. KURIR TAB */}
+                    {activeTab === 'kurir' && (
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 animate-fadeIn">
+                            {filteredKurir.map(k => (
+                                <div key={k.id_kurir} className="bg-white dark:bg-slate-900/50 p-6 rounded-3xl border border-slate-200 dark:border-white/5 text-center space-y-4 hover:scale-[1.01] transition-all">
+                                    <div className="w-16 h-16 rounded-2xl bg-blue-600/10 text-blue-500 flex items-center justify-center text-3xl mx-auto font-black">
+                                        🛵
+                                    </div>
+                                    <div>
+                                        <h3 className="text-sm font-black text-slate-800 dark:text-white">{k.nama_kurir}</h3>
+                                        <p className="text-[10px] text-slate-400 mt-1">{k.no_hp}</p>
+                                    </div>
+                                    <div className="pt-2 border-t border-slate-100 dark:border-white/5 space-y-1">
+                                        <span className="block text-[10px] font-bold text-slate-700 dark:text-slate-300">{k.kendaraan}</span>
+                                        <span className="block text-[9px] font-bold text-slate-400 tracking-wider">{k.plat_nomor}</span>
+                                    </div>
+                                    <span className="inline-block px-2.5 py-1 bg-emerald-500/10 text-emerald-500 text-[9px] font-bold rounded-lg uppercase">{k.status_kurir}</span>
+                                </div>
+                            ))}
+                        </div>
+                    )}
+
+                    {/* 6. LANGGANAN TAB */}
                     {activeTab === 'langganan' && (
-                        <div className="space-y-8 animate-fadeIn">
-                            <div className="space-y-2">
-                                <h2 className="text-2xl font-black tracking-tight text-slate-900 dark:text-white">Pelanggan Langganan Aktif 💧</h2>
-                                <p className="text-xs text-slate-500 dark:text-slate-400 font-light">Data keanggotaan paket distribusi berkala Rindu Water.</p>
-                            </div>
-
-                            <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl shadow-sm overflow-hidden">
-                                <div className="px-6 py-5 border-b border-slate-200 dark:border-slate-800">
-                                    <h3 className="text-sm font-black text-slate-800 dark:text-white">Daftar Langganan Aktif</h3>
-                                </div>
-                                <div className="overflow-x-auto">
-                                    <table className="w-full text-left text-xs text-slate-600 dark:text-slate-400">
-                                        <thead className="bg-slate-50 dark:bg-slate-800/40 text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider">
-                                            <tr>
-                                                <th className="py-4.5 px-6">Pelanggan</th>
-                                                <th className="py-4.5 px-6">Nomor Telp</th>
-                                                <th className="py-4.5 px-6">Tipe Antaran</th>
-                                                <th className="py-4.5 px-6">Jumlah</th>
-                                                <th className="py-4.5 px-6">Status</th>
+                        <div className="bg-white dark:bg-slate-900/50 rounded-3xl border border-slate-200 dark:border-white/5 p-6 space-y-6 shadow-sm animate-fadeIn">
+                            <h3 className="text-sm font-black text-slate-800 dark:text-white uppercase tracking-wider">Pelanggan Aktif Pasokan Air</h3>
+                            <div className="overflow-x-auto">
+                                <table className="w-full text-left text-xs">
+                                    <thead>
+                                        <tr className="border-b border-slate-200 dark:border-white/5 text-slate-400 font-bold uppercase tracking-wider">
+                                            <th className="py-4">Pelanggan</th>
+                                            <th className="py-4">Kontak</th>
+                                            <th className="py-4">Frekuensi</th>
+                                            <th className="py-4">Jumlah Pasokan</th>
+                                            <th className="py-4">Status</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody className="divide-y divide-slate-100 dark:divide-white/5 font-medium">
+                                        {filteredLangganan.map(l => (
+                                            <tr key={l.id_langganan} className="hover:bg-slate-50 dark:hover:bg-white/5 transition">
+                                                <td className="py-4 font-bold">{l.nama_pelanggan}</td>
+                                                <td className="py-4">
+                                                    <div className="space-y-0.5">
+                                                        <span className="block font-semibold">{l.email}</span>
+                                                        <span className="block text-[10px] text-slate-400">{l.no_telepon}</span>
+                                                    </div>
+                                                </td>
+                                                <td className="py-4">
+                                                    <span className="px-2.5 py-1 rounded-lg text-[9px] font-bold uppercase bg-blue-500/10 text-blue-500">
+                                                        {l.periode_pengantaran}
+                                                    </span>
+                                                </td>
+                                                <td className="py-4 font-bold text-slate-700 dark:text-slate-350">{l.jumlah_pesanan} Galon / Antar</td>
+                                                <td className="py-4">
+                                                    <span className="px-2.5 py-1 rounded-lg text-[9px] font-bold uppercase bg-emerald-500/10 text-emerald-500">
+                                                        {l.status_langganan || 'aktif'}
+                                                    </span>
+                                                </td>
                                             </tr>
-                                        </thead>
-                                        <tbody className="divide-y divide-slate-150 dark:divide-slate-800">
-                                            {listLangganan.filter(l => l.nama_pelanggan.toLowerCase().includes(searchQuery.toLowerCase())).map((lg) => (
-                                                <tr key={lg.id_langganan} className="hover:bg-slate-50/50 dark:hover:bg-slate-800/20">
-                                                    <td className="py-4.5 px-6">
-                                                        <div>
-                                                            <span className="block font-extrabold text-slate-850 dark:text-white">{lg.nama_pelanggan}</span>
-                                                            <span className="block text-[10px] text-slate-400">{lg.email}</span>
-                                                        </div>
-                                                    </td>
-                                                    <td className="py-4.5 px-6">{lg.no_telepon}</td>
-                                                    <td className="py-4.5 px-6 uppercase font-bold text-blue-600 dark:text-blue-400">{lg.periode_pengantaran}</td>
-                                                    <td className="py-4.5 px-6 font-extrabold">{lg.jumlah_pesanan} Unit</td>
-                                                    <td className="py-4.5 px-6">
-                                                        <span className="inline-block px-2.5 py-0.5 rounded-full text-[9px] font-bold uppercase bg-emerald-500/10 text-emerald-500">
-                                                            {lg.status_langganan}
-                                                        </span>
-                                                    </td>
-                                                </tr>
-                                            ))}
-                                        </tbody>
-                                    </table>
-                                </div>
+                                        ))}
+                                    </tbody>
+                                </table>
                             </div>
                         </div>
                     )}
-
                 </div>
             </main>
         </div>

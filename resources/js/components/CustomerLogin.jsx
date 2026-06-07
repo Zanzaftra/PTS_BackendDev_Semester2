@@ -1,13 +1,12 @@
 import React, { useState } from 'react';
 
-export default function Login() {
+export default function CustomerLogin() {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [showPassword, setShowPassword] = useState(false);
+    
     const [error, setError] = useState('');
     const [loading, setLoading] = useState(false);
-    
-    // Client-side validation states
     const [emailError, setEmailError] = useState('');
     const [passwordError, setPasswordError] = useState('');
 
@@ -41,15 +40,14 @@ export default function Login() {
     const handleSubmit = async (e) => {
         e.preventDefault();
         setError('');
-        
+
         const isEmailValid = validateEmail(email);
         const isPasswordValid = validatePassword(password);
-
         if (!isEmailValid || !isPasswordValid) return;
 
         setLoading(true);
         try {
-            const response = await fetch('/admin/login', {
+            const response = await fetch('/customer/login', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -63,7 +61,6 @@ export default function Login() {
             setLoading(false);
 
             if (data.success) {
-                // Successful login! Smooth redirect
                 window.location.href = data.redirect;
             } else {
                 setError(data.message || 'Email atau password salah.');
@@ -75,25 +72,24 @@ export default function Login() {
     };
 
     return (
-        <div className="min-h-screen bg-gradient-to-tr from-slate-950 via-slate-900 to-brand-950 flex items-center justify-center p-6 relative overflow-hidden">
-            {/* Ambient background water blobs */}
-            <div className="absolute top-0 right-0 w-[40vw] h-[40vw] bg-blue-500/10 rounded-full blur-[100px] pointer-events-none -z-10"></div>
-            <div className="absolute bottom-0 left-0 w-[35vw] h-[35vw] bg-brand-500/10 rounded-full blur-[100px] pointer-events-none -z-10"></div>
+        <div className="min-h-screen bg-gradient-to-tr from-slate-950 via-slate-900 to-sky-950 flex items-center justify-center p-6 relative overflow-hidden">
+            {/* Ambient dynamic water blobs */}
+            <div className="absolute top-0 right-0 w-[40vw] h-[40vw] bg-sky-500/10 rounded-full blur-[100px] pointer-events-none -z-10"></div>
+            <div className="absolute bottom-0 left-0 w-[35vw] h-[35vw] bg-teal-500/10 rounded-full blur-[100px] pointer-events-none -z-10"></div>
 
-            <div className="w-full max-w-md bg-slate-900/50 backdrop-blur-xl border border-white/10 p-8 md:p-10 rounded-[2.5rem] shadow-2xl space-y-8 relative">
+            <div className="w-full max-w-md bg-slate-900/50 backdrop-blur-xl border border-white/10 p-8 md:p-10 rounded-[2.5rem] shadow-2xl space-y-6 relative">
                 
-                {/* Logo and title */}
+                {/* Logo & titles */}
                 <div className="text-center space-y-3">
-                    <div className="w-14 h-14 bg-gradient-to-tr from-blue-600 to-sky-400 rounded-2xl flex items-center justify-center mx-auto shadow-lg shadow-blue-500/20">
+                    <div className="w-14 h-14 bg-gradient-to-tr from-sky-500 to-teal-400 rounded-2xl flex items-center justify-center mx-auto shadow-lg shadow-sky-500/20">
                         <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z" />
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
                         </svg>
                     </div>
-                    <h2 className="text-2xl font-black text-white tracking-tight">Login Portal Admin</h2>
-                    <p className="text-xs text-slate-400 font-light">Masukkan kredensial Anda untuk mengakses Dashboard Rindu Water</p>
+                    <h2 className="text-2xl font-black text-white tracking-tight">Portal Pelanggan</h2>
+                    <p className="text-xs text-slate-400 font-light font-sans font-sans">Masuk ke akun pelanggan Rindu Water Anda</p>
                 </div>
 
-                {/* Main Error Banner */}
                 {error && (
                     <div className="p-4 rounded-xl bg-rose-500/10 border border-rose-500/20 text-rose-400 text-xs font-semibold flex items-center gap-3 animate-fadeIn">
                         <span className="w-5 h-5 rounded-full bg-rose-500 text-white flex items-center justify-center shrink-0 text-[10px] font-bold">!</span>
@@ -101,10 +97,10 @@ export default function Login() {
                     </div>
                 )}
 
-                <form onSubmit={handleSubmit} className="space-y-6">
+                <form onSubmit={handleSubmit} className="space-y-4">
                     {/* Email Input */}
                     <div className="space-y-2">
-                        <label className="block text-xs font-bold text-slate-400 uppercase tracking-widest">Alamat Email</label>
+                        <label className="block text-xs font-bold text-slate-400 uppercase tracking-widest font-sans font-sans">Alamat Email</label>
                         <div className="relative">
                             <input 
                                 type="email" 
@@ -115,8 +111,8 @@ export default function Login() {
                                 }}
                                 onBlur={(e) => validateEmail(e.target.value)}
                                 required
-                                placeholder="nama@rinduwater.com" 
-                                className={`w-full px-4 py-3.5 bg-slate-950/40 border ${emailError ? 'border-rose-500/50' : 'border-white/10 focus:border-blue-500'} rounded-xl text-sm focus:outline-none text-white transition shadow-inner`}
+                                placeholder="nama@email.com" 
+                                className={`w-full px-4 py-3 bg-slate-950/40 border ${emailError ? 'border-rose-500/50' : 'border-white/10 focus:border-sky-500'} rounded-xl text-sm focus:outline-none text-white transition shadow-inner font-sans`}
                             />
                         </div>
                         {emailError && (
@@ -126,7 +122,7 @@ export default function Login() {
 
                     {/* Password Input */}
                     <div className="space-y-2">
-                        <label className="block text-xs font-bold text-slate-400 uppercase tracking-widest">Kata Sandi</label>
+                        <label className="block text-xs font-bold text-slate-400 uppercase tracking-widest font-sans">Kata Sandi</label>
                         <div className="relative">
                             <input 
                                 type={showPassword ? 'text' : 'password'} 
@@ -138,13 +134,12 @@ export default function Login() {
                                 onBlur={(e) => validatePassword(e.target.value)}
                                 required
                                 placeholder="••••••••" 
-                                className={`w-full pl-4 pr-12 py-3.5 bg-slate-950/40 border ${passwordError ? 'border-rose-500/50' : 'border-white/10 focus:border-blue-500'} rounded-xl text-sm focus:outline-none text-white transition shadow-inner`}
+                                className={`w-full pl-4 pr-12 py-3 bg-slate-950/40 border ${passwordError ? 'border-rose-500/50' : 'border-white/10 focus:border-sky-500'} rounded-xl text-sm focus:outline-none text-white transition shadow-inner`}
                             />
-                            {/* Toggle Show/Hide Password Eye Icon */}
                             <button 
                                 type="button" 
                                 onClick={() => setShowPassword(!showPassword)}
-                                className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-450 hover:text-white transition"
+                                className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-white transition"
                             >
                                 {showPassword ? (
                                     <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -163,11 +158,10 @@ export default function Login() {
                         )}
                     </div>
 
-                    {/* Submit Button */}
                     <button 
                         type="submit" 
                         disabled={loading}
-                        className="w-full py-4 bg-gradient-to-r from-blue-600 to-sky-500 hover:from-blue-700 hover:to-sky-600 text-white rounded-xl text-xs font-bold tracking-widest uppercase shadow-lg shadow-blue-500/10 hover:shadow-blue-500/20 active:scale-[0.99] hover:scale-[1.01] transition-all flex items-center justify-center gap-3"
+                        className="w-full py-3.5 bg-gradient-to-r from-sky-500 to-teal-400 hover:from-sky-650 hover:to-teal-500 text-white rounded-xl text-xs font-bold tracking-widest uppercase shadow-lg shadow-sky-500/10 hover:shadow-sky-500/20 active:scale-[0.99] hover:scale-[1.01] transition-all flex items-center justify-center gap-3 font-sans"
                     >
                         {loading ? (
                             <svg className="animate-spin h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
@@ -175,7 +169,7 @@ export default function Login() {
                                 <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                             </svg>
                         ) : null}
-                        <span>{loading ? 'Menghubungkan...' : 'Masuk Dashboard'}</span>
+                        <span>{loading ? 'Menghubungkan...' : 'Masuk Dashboard Saya'}</span>
                     </button>
                 </form>
 
@@ -183,16 +177,18 @@ export default function Login() {
                 <div className="text-center">
                     <p className="text-xs text-slate-400 font-light">
                         Belum memiliki akun?{' '}
-                        <a href="/admin/register" className="font-bold text-blue-400 hover:text-blue-300 transition pl-1">
-                            Daftar Portal
+                        <a href="/customer/register" className="font-bold text-sky-400 hover:text-sky-300 transition pl-1">
+                            Daftar Pelanggan
                         </a>
                     </p>
                 </div>
 
                 {/* Helpful Hint Box */}
-                <div className="p-4 bg-white/5 rounded-xl border border-white/5 text-[11px] text-slate-400 font-light leading-relaxed">
-                    <span className="font-semibold text-slate-200 block mb-1">💡 Petunjuk Masuk Demo</span>
-                    Gunakan email <span className="font-bold text-blue-400">admin@rinduwater.com</span> dan sandi <span className="font-bold text-blue-400">admin123</span> untuk otentikasi cepat.
+                <div className="p-4 bg-white/5 rounded-xl border border-white/5 text-[11px] text-slate-400 font-light leading-relaxed font-sans">
+                    <span className="font-semibold text-slate-200 block mb-1">💡 Uji Coba Demo</span>
+                    Email: <span className="font-bold text-sky-400">customer@rinduwater.com</span>
+                    <br />
+                    Password: <span className="font-bold text-sky-400">customer123</span>
                 </div>
             </div>
         </div>

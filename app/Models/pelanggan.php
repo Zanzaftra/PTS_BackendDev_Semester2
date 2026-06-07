@@ -20,6 +20,7 @@ class pelanggan extends Model
         'alamat',
         'no_telepon',
         'email',
+        'password',
         'tanggal_daftar',
         'status_pelanggan',
     ];
