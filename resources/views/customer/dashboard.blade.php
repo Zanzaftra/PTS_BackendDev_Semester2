@@ -80,10 +80,10 @@
             const initialData = window.__CUSTOMER_DATA__ || {};
 
             const customer = initialData.customer || {
-                nama_pelanggan: 'Pelanggan Demo',
+                nama_pelanggan: 'Pelanggan',
                 email: 'customer@rinduwater.com',
                 no_telepon: '0812-3456-7890',
-                alamat: 'Jl. Air Bersih No. 10, Jakarta Selatan',
+                alamat: 'Alamat belum diisi',
                 jenis_pelanggan: 'individu'
             };
 
@@ -198,7 +198,7 @@
                         <div className="absolute top-0 right-0 w-[300px] h-[300px] bg-white/10 rounded-full blur-[80px] pointer-events-none -z-10"></div>
                         <div className="max-w-6xl mx-auto space-y-3">
                             <span className="px-3 py-1 bg-white/20 rounded-full text-[10px] font-black tracking-widest uppercase">Dashboard Pelanggan</span>
-                            <h2 className="text-3xl font-black tracking-tight">Selamat Datang Kembali, {customer.nama_pelanggan}!</h2>
+                            <h2 className="text-3xl font-black tracking-tight">Selamat Datang, {customer.nama_pelanggan}!</h2>
                             <p className="text-xs font-light text-white/80 max-w-xl">
                                 Pantau status pengiriman air galon Anda, kelola pasokan langganan aktif, dan akses riwayat belanja Anda dengan mudah.
                             </p>
@@ -283,7 +283,7 @@
                                             <h4 className="text-xs font-black uppercase tracking-wider text-slate-400">💡 Pesan Air Tambahan</h4>
                                             <p className="text-[11px] text-slate-400 font-light leading-relaxed">Kehabisan stok air sebelum jadwal reguler Anda? Pesan langsung satu-kali sekarang juga.</p>
                                         </div>
-                                        <a href="/#order-wizard-section" className="w-full mt-4 py-3 bg-gradient-to-r from-sky-500 to-teal-400 text-white text-center rounded-xl text-xs font-bold uppercase tracking-wider transition-all block shadow-md">Pesan Air Sekarang</a>
+                                        <a href="/customer/beli" className="w-full mt-4 py-3 bg-gradient-to-r from-sky-500 to-teal-400 text-white text-center rounded-xl text-xs font-bold uppercase tracking-wider transition-all block shadow-md">Pesan Air Sekarang</a>
                                     </div>
                                 </div>
                             </div>
@@ -338,7 +338,7 @@
                                         <div className="py-12 text-center space-y-3">
                                             <span className="text-4xl">💧</span>
                                             <p className="text-xs text-slate-400 font-light">Anda belum terdaftar dalam paket langganan reguler.</p>
-                                            <a href="/#order-wizard-section" className="inline-block text-xs font-bold text-sky-500 hover:underline">Pesan Langganan Mingguan / Bulanan Sekarang</a>
+                                            <a href="/customer/beli" className="inline-block text-xs font-bold text-sky-500 hover:underline">Pesan Langganan Mingguan / Bulanan Sekarang</a>
                                         </div>
                                     ) : (
                                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">

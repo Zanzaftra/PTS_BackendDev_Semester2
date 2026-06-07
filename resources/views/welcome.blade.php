@@ -101,6 +101,8 @@
           trackInvoice: '',
           trackingData: null,
           showAdminPanel: false,
+          portalOpen: false,
+          portalMode: 'login',
           
           /* Checkout Wizard State */
           wizardStep: 1,
@@ -180,25 +182,19 @@
                         <path stroke-linecap="round" stroke-linejoin="round" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364-6.364l-.707.707M6.343 17.657l-.707.707m0-12.728l.707.707m12.728 12.728l.707-.707M12 8a4 4 0 100 8 4 4 0 000-8z" />
                     </svg>
                 </button>
-                <!-- Login Admin Portal Button -->
-                <a href="/admin/login" class="px-4 py-2.5 rounded-xl text-xs font-extrabold tracking-wider uppercase border-2 border-blue-500/30 text-blue-600 dark:text-blue-400 hover:bg-blue-600 hover:text-white hover:border-blue-600 dark:hover:bg-blue-500 dark:hover:border-blue-500 dark:hover:text-white shadow-sm transition-all duration-300 flex items-center gap-2" title="Masuk ke Portal Admin">
+                <button @click="portalOpen = true; portalMode = 'login'" class="px-4 py-2.5 rounded-xl text-xs font-extrabold tracking-wider uppercase border-2 border-blue-500/30 text-blue-600 dark:text-blue-400 hover:bg-blue-600 hover:text-white hover:border-blue-600 dark:hover:bg-blue-500 dark:hover:border-blue-500 dark:hover:text-white shadow-sm transition-all duration-300 flex items-center gap-2" title="Masuk ke portal Rindu Water">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                     </svg>
-                    Login Admin
-                </a>
+                    Login
+                </button>
 
-                <!-- Portal Pelanggan Buttons -->
-                <a href="/customer/login" class="px-4 py-2.5 rounded-xl text-xs font-extrabold tracking-wider uppercase border-2 border-sky-500/30 text-sky-600 dark:text-sky-400 hover:bg-sky-600 hover:text-white hover:border-sky-600 dark:hover:bg-sky-500 dark:hover:border-sky-500 dark:hover:text-white shadow-sm transition-all duration-300 flex items-center gap-2" title="Masuk ke Portal Pelanggan">
+                <button @click="portalOpen = true; portalMode = 'register'" class="px-4 py-2.5 rounded-xl text-xs font-extrabold tracking-wider uppercase border border-sky-500 bg-sky-500 text-white hover:bg-sky-600 hover:border-sky-600 shadow-sm transition-all duration-300 flex items-center gap-2" title="Daftar akun Rindu Water">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1" />
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" />
                     </svg>
-                    Login Pelanggan
-                </a>
-
-                <a href="/customer/register" class="px-4 py-2.5 rounded-xl text-xs font-extrabold tracking-wider uppercase border border-sky-500 bg-sky-500 text-white hover:bg-sky-600 hover:border-sky-600 shadow-sm transition-all duration-300 flex items-center gap-2" title="Daftar Akun Pelanggan">
                     Daftar
-                </a>
+                </button>
 
                 <a href="#order-wizard-section" class="px-5 py-2.5 bg-gradient-to-r from-blue-600 to-sky-500 hover:from-blue-700 hover:to-sky-600 text-white rounded-xl text-xs font-extrabold tracking-wider uppercase shadow-md shadow-blue-500/10 hover:shadow-blue-500/30 transition-all duration-300">Pesan Sekarang</a>
             </div>
@@ -1281,25 +1277,19 @@
             <span class="text-[11px] font-semibold text-slate-500">© 2026 Kangen Water. Seluruh Hak Cipta Dilindungi.</span>
             
             <div class="flex items-center gap-3">
-                <!-- Direct Admin Login Link -->
-                <a href="/admin/login" class="px-4 py-2 border border-blue-500/20 hover:border-blue-500/50 bg-blue-500/5 hover:bg-blue-500/10 rounded-xl text-xs font-bold text-blue-400 hover:text-blue-300 transition-all flex items-center gap-2">
+                <button @click="portalOpen = true; portalMode = 'login'" class="px-4 py-2 border border-blue-500/20 hover:border-blue-500/50 bg-blue-500/5 hover:bg-blue-500/10 rounded-xl text-xs font-bold text-blue-400 hover:text-blue-300 transition-all flex items-center gap-2">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1" />
                     </svg>
-                    Portal Admin
-                </a>
+                    Login
+                </button>
 
-                <!-- Direct Customer Login & Register Link -->
-                <a href="/customer/login" class="px-4 py-2 border border-sky-500/20 hover:border-sky-500/50 bg-sky-500/5 hover:bg-sky-500/10 rounded-xl text-xs font-bold text-sky-400 hover:text-sky-300 transition-all flex items-center gap-2">
+                <button @click="portalOpen = true; portalMode = 'register'" class="px-4 py-2 border border-sky-500/20 hover:border-sky-500/50 bg-sky-500/5 hover:bg-sky-500/10 rounded-xl text-xs font-bold text-sky-400 hover:text-sky-300 transition-all flex items-center gap-2">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" />
                     </svg>
-                    Portal Pelanggan
-                </a>
-
-                <a href="/customer/register" class="px-4 py-2 border border-slate-700 hover:border-slate-500 bg-slate-800/20 rounded-xl text-xs font-bold text-slate-405 hover:text-slate-300 transition-all">
-                    Daftar Pelanggan
-                </a>
+                    Daftar
+                </button>
                 
                 <!-- Admin Preview Toggle Switch -->
                 <button @click="showAdminPanel = !showAdminPanel" 
@@ -1405,6 +1395,38 @@
             <span>Server: local</span>
             <span>Framework: Laravel 11</span>
             <span>CSS: Tailwind v4</span>
+        </div>
+    </div>
+
+    <div x-show="portalOpen" x-transition.opacity class="fixed inset-0 z-[60] flex items-start justify-center px-4 pt-16 sm:px-6">
+        <div class="absolute inset-0 bg-slate-950/70 backdrop-blur-sm" @click="portalOpen = false"></div>
+        <div class="relative w-full max-w-lg rounded-3xl border border-white/10 bg-white/95 p-6 shadow-2xl shadow-slate-950/30 dark:border-slate-800 dark:bg-slate-900/95">
+            <div class="flex items-start justify-between gap-4">
+                <div>
+                    <p class="text-[10px] font-black uppercase tracking-[0.35em] text-blue-500">Akses Portal</p>
+                    <h3 class="mt-1 text-xl font-black text-slate-900 dark:text-white" x-text="portalMode === 'login' ? 'Pilih jenis Login' : 'Pilih jenis Daftar'"></h3>
+                    <p class="mt-2 text-sm text-slate-600 dark:text-slate-300">Pilih role yang ingin Anda gunakan, lalu lanjut ke halaman yang sesuai.</p>
+                </div>
+                <button @click="portalOpen = false" class="rounded-full border border-slate-200 bg-white p-2 text-slate-500 hover:bg-slate-100 hover:text-slate-700 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-300 dark:hover:bg-slate-800 dark:hover:text-white" aria-label="Tutup pilihan portal">✕</button>
+            </div>
+
+            <div class="mt-6 grid gap-3 sm:grid-cols-2">
+                <a :href="portalMode === 'login' ? '/admin/login' : '/admin/register'" class="rounded-2xl border border-blue-200 bg-blue-50 p-4 text-left transition hover:-translate-y-0.5 hover:border-blue-400 hover:bg-blue-100 dark:border-blue-900/60 dark:bg-blue-950/30 dark:hover:border-blue-500 dark:hover:bg-blue-950/50">
+                    <p class="text-[10px] font-black uppercase tracking-[0.35em] text-blue-500">Admin</p>
+                    <h4 class="mt-2 text-lg font-black text-slate-900 dark:text-white">Masuk / Daftar Admin</h4>
+                    <p class="mt-1 text-sm text-slate-600 dark:text-slate-300">Untuk tim internal, operasional, dan dashboard manajemen.</p>
+                </a>
+
+                <a :href="portalMode === 'login' ? '/customer/login' : '/customer/register'" class="rounded-2xl border border-sky-200 bg-sky-50 p-4 text-left transition hover:-translate-y-0.5 hover:border-sky-400 hover:bg-sky-100 dark:border-sky-900/60 dark:bg-sky-950/30 dark:hover:border-sky-500 dark:hover:bg-sky-950/50">
+                    <p class="text-[10px] font-black uppercase tracking-[0.35em] text-sky-500">Pelanggan</p>
+                    <h4 class="mt-2 text-lg font-black text-slate-900 dark:text-white">Masuk / Daftar Pelanggan</h4>
+                    <p class="mt-1 text-sm text-slate-600 dark:text-slate-300">Untuk pelanggan baru dan pemesanan air mineral harian.</p>
+                </a>
+            </div>
+
+            <div class="mt-6 flex items-center justify-end gap-3">
+                <button @click="portalOpen = false" class="rounded-xl border border-slate-200 bg-white px-4 py-2 text-xs font-bold uppercase tracking-wider text-slate-600 hover:bg-slate-100 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-200 dark:hover:bg-slate-800">Batal</button>
+            </div>
         </div>
     </div>
 

@@ -4,11 +4,7 @@ export default function CustomerRegister() {
     const [namaPelanggan, setNamaPelanggan] = useState('');
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
-    const [noTelepon, setNoTelepon] = useState('');
-    const [alamat, setAlamat] = useState('');
-    const [jenisPelanggan, setJenisPelanggan] = useState('individu');
-    const [namaLembaga, setNamaLembaga] = useState('');
-    const [penanggungJawab, setPenanggungJawab] = useState('');
+    const [passwordConfirmation, setPasswordConfirmation] = useState('');
     
     const [showPassword, setShowPassword] = useState(false);
     const [error, setError] = useState('');
@@ -19,8 +15,7 @@ export default function CustomerRegister() {
     const [namaError, setNamaError] = useState('');
     const [emailError, setEmailError] = useState('');
     const [passwordError, setPasswordError] = useState('');
-    const [telpError, setTelpError] = useState('');
-    const [alamatError, setAlamatError] = useState('');
+    const [confirmationError, setConfirmationError] = useState('');
 
     const validateNama = (val) => {
         if (!val) {
@@ -58,21 +53,16 @@ export default function CustomerRegister() {
         return true;
     };
 
-    const validateTelp = (val) => {
+    const validateConfirmation = (val) => {
         if (!val) {
-            setTelpError('Nomor telepon wajib diisi.');
+            setConfirmationError('Konfirmasi kata sandi wajib diisi.');
             return false;
         }
-        setTelpError('');
-        return true;
-    };
-
-    const validateAlamat = (val) => {
-        if (!val) {
-            setAlamatError('Alamat wajib diisi.');
+        if (val !== password) {
+            setConfirmationError('Konfirmasi kata sandi tidak cocok.');
             return false;
         }
-        setAlamatError('');
+        setConfirmationError('');
         return true;
     };
 
@@ -84,10 +74,9 @@ export default function CustomerRegister() {
         const isNamaValid = validateNama(namaPelanggan);
         const isEmailValid = validateEmail(email);
         const isPasswordValid = validatePassword(password);
-        const isTelpValid = validateTelp(noTelepon);
-        const isAlamatValid = validateAlamat(alamat);
+        const isConfirmationValid = validateConfirmation(passwordConfirmation);
 
-        if (!isNamaValid || !isEmailValid || !isPasswordValid || !isTelpValid || !isAlamatValid) return;
+        if (!isNamaValid || !isEmailValid || !isPasswordValid || !isConfirmationValid) return;
 
         setLoading(true);
         try {
@@ -102,11 +91,7 @@ export default function CustomerRegister() {
                     nama_pelanggan: namaPelanggan,
                     email,
                     password,
-                    no_telepon: noTelepon,
-                    alamat,
-                    jenis_pelanggan: jenisPelanggan,
-                    nama_lembaga: jenisPelanggan === 'lembaga' ? namaLembaga : null,
-                    penanggung_jawab: jenisPelanggan === 'lembaga' ? penanggungJawab : namaPelanggan
+                    password_confirmation: passwordConfirmation
                 })
             });
 
@@ -161,27 +146,6 @@ export default function CustomerRegister() {
                 )}
 
                 <form onSubmit={handleSubmit} className="space-y-4">
-                    {/* Customer Type Toggle */}
-                    <div className="space-y-2">
-                        <label className="block text-xs font-bold text-slate-400 uppercase tracking-widest">Tipe Pelanggan</label>
-                        <div className="flex gap-2">
-                            <button 
-                                type="button"
-                                onClick={() => setJenisPelanggan('individu')}
-                                className={`flex-1 py-2 rounded-xl text-xs font-bold border transition ${jenisPelanggan === 'individu' ? 'bg-sky-500 border-sky-500 text-white' : 'border-white/10 text-slate-400 hover:text-white'}`}
-                            >
-                                Individu / Rumah Tangga
-                            </button>
-                            <button 
-                                type="button"
-                                onClick={() => setJenisPelanggan('lembaga')}
-                                className={`flex-1 py-2 rounded-xl text-xs font-bold border transition ${jenisPelanggan === 'lembaga' ? 'bg-sky-500 border-sky-500 text-white' : 'border-white/10 text-slate-400 hover:text-white'}`}
-                            >
-                                Lembaga / Perusahaan
-                            </button>
-                        </div>
-                    </div>
-
                     {/* Full Name */}
                     <div className="space-y-2">
                         <label className="block text-xs font-bold text-slate-400 uppercase tracking-widest">Nama Lengkap</label>
@@ -200,87 +164,22 @@ export default function CustomerRegister() {
                         {namaError && <span className="text-[10px] font-semibold text-rose-400 block">{namaError}</span>}
                     </div>
 
-                    {/* Conditional fields for Lembaga */}
-                    {jenisPelanggan === 'lembaga' && (
-                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 animate-fadeIn">
-                            <div className="space-y-2">
-                                <label className="block text-xs font-bold text-slate-400 uppercase tracking-widest">Nama Lembaga</label>
-                                <input 
-                                    type="text" 
-                                    value={namaLembaga}
-                                    onChange={(e) => setNamaLembaga(e.target.value)}
-                                    required
-                                    placeholder="PT. Angkasa Makmur" 
-                                    className="w-full px-4 py-2.5 bg-slate-950/40 border border-white/10 focus:border-sky-500 rounded-xl text-sm focus:outline-none text-white transition"
-                                />
-                            </div>
-                            <div className="space-y-2">
-                                <label className="block text-xs font-bold text-slate-400 uppercase tracking-widest">Penanggung Jawab</label>
-                                <input 
-                                    type="text" 
-                                    value={penanggungJawab}
-                                    onChange={(e) => setPenanggungJawab(e.target.value)}
-                                    required
-                                    placeholder="Nama PIC" 
-                                    className="w-full px-4 py-2.5 bg-slate-950/40 border border-white/10 focus:border-sky-500 rounded-xl text-sm focus:outline-none text-white transition"
-                                />
-                            </div>
-                        </div>
-                    )}
-
-                    {/* Grid for Email & Phone */}
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                        <div className="space-y-2">
-                            <label className="block text-xs font-bold text-slate-400 uppercase tracking-widest">Alamat Email</label>
-                            <input 
-                                type="email" 
-                                value={email}
-                                onChange={(e) => {
-                                    setEmail(e.target.value);
-                                    if(emailError) validateEmail(e.target.value);
-                                }}
-                                onBlur={(e) => validateEmail(e.target.value)}
-                                required
-                                placeholder="nama@email.com" 
-                                className={`w-full px-4 py-2.5 bg-slate-950/40 border ${emailError ? 'border-rose-500/50' : 'border-white/10 focus:border-sky-500'} rounded-xl text-sm focus:outline-none text-white transition`}
-                            />
-                            {emailError && <span className="text-[10px] font-semibold text-rose-400 block">{emailError}</span>}
-                        </div>
-
-                        <div className="space-y-2">
-                            <label className="block text-xs font-bold text-slate-400 uppercase tracking-widest">Nomor Telepon</label>
-                            <input 
-                                type="text" 
-                                value={noTelepon}
-                                onChange={(e) => {
-                                    setNoTelepon(e.target.value);
-                                    if(telpError) validateTelp(e.target.value);
-                                }}
-                                onBlur={(e) => validateTelp(e.target.value)}
-                                required
-                                placeholder="081234567890" 
-                                className={`w-full px-4 py-2.5 bg-slate-950/40 border ${telpError ? 'border-rose-500/50' : 'border-white/10 focus:border-sky-500'} rounded-xl text-sm focus:outline-none text-white transition`}
-                            />
-                            {telpError && <span className="text-[10px] font-semibold text-rose-400 block">{telpError}</span>}
-                        </div>
-                    </div>
-
-                    {/* Address */}
+                    {/* Email */}
                     <div className="space-y-2">
-                        <label className="block text-xs font-bold text-slate-400 uppercase tracking-widest">Alamat Pengiriman</label>
-                        <textarea 
-                            value={alamat}
+                        <label className="block text-xs font-bold text-slate-400 uppercase tracking-widest">Alamat Email</label>
+                        <input 
+                            type="email" 
+                            value={email}
                             onChange={(e) => {
-                                setAlamat(e.target.value);
-                                if(alamatError) validateAlamat(e.target.value);
+                                setEmail(e.target.value);
+                                if(emailError) validateEmail(e.target.value);
                             }}
-                            onBlur={(e) => validateAlamat(e.target.value)}
+                            onBlur={(e) => validateEmail(e.target.value)}
                             required
-                            placeholder="Tulis alamat lengkap pengiriman galon air Anda..." 
-                            rows="2"
-                            className={`w-full px-4 py-2.5 bg-slate-950/40 border ${alamatError ? 'border-rose-500/50' : 'border-white/10 focus:border-sky-500'} rounded-xl text-sm focus:outline-none text-white transition`}
+                            placeholder="nama@email.com" 
+                            className={`w-full px-4 py-2.5 bg-slate-950/40 border ${emailError ? 'border-rose-500/50' : 'border-white/10 focus:border-sky-500'} rounded-xl text-sm focus:outline-none text-white transition`}
                         />
-                        {alamatError && <span className="text-[10px] font-semibold text-rose-400 block">{alamatError}</span>}
+                        {emailError && <span className="text-[10px] font-semibold text-rose-400 block">{emailError}</span>}
                     </div>
 
                     {/* Password */}
@@ -293,6 +192,7 @@ export default function CustomerRegister() {
                                 onChange={(e) => {
                                     setPassword(e.target.value);
                                     if(passwordError) validatePassword(e.target.value);
+                                    if(confirmationError) validateConfirmation(passwordConfirmation);
                                 }}
                                 onBlur={(e) => validatePassword(e.target.value)}
                                 required
@@ -317,6 +217,23 @@ export default function CustomerRegister() {
                             </button>
                         </div>
                         {passwordError && <span className="text-[10px] font-semibold text-rose-400 block">{passwordError}</span>}
+                    </div>
+
+                    <div className="space-y-2">
+                        <label className="block text-xs font-bold text-slate-400 uppercase tracking-widest">Konfirmasi Kata Sandi</label>
+                        <input
+                            type={showPassword ? 'text' : 'password'}
+                            value={passwordConfirmation}
+                            onChange={(e) => {
+                                setPasswordConfirmation(e.target.value);
+                                if(confirmationError) validateConfirmation(e.target.value);
+                            }}
+                            onBlur={(e) => validateConfirmation(e.target.value)}
+                            required
+                            placeholder="Ulangi kata sandi"
+                            className={`w-full px-4 py-2.5 bg-slate-950/40 border ${confirmationError ? 'border-rose-500/50' : 'border-white/10 focus:border-sky-500'} rounded-xl text-sm focus:outline-none text-white transition`}
+                        />
+                        {confirmationError && <span className="text-[10px] font-semibold text-rose-400 block">{confirmationError}</span>}
                     </div>
 
                     {/* Submit */}

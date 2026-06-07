@@ -6,10 +6,10 @@ export default function CustomerDashboard({ initialData }) {
     const [profileDropdown, setProfileDropdown] = useState(false);
 
     const customer = initialData?.customer || {
-        nama_pelanggan: 'Pelanggan Demo',
+        nama_pelanggan: 'Pelanggan',
         email: 'customer@rinduwater.com',
         no_telepon: '0812-3456-7890',
-        alamat: 'Jl. Air Bersih No. 10, Jakarta Selatan',
+        alamat: 'Alamat belum diisi',
         jenis_pelanggan: 'individu'
     };
 
@@ -125,7 +125,7 @@ export default function CustomerDashboard({ initialData }) {
                 <div className="absolute top-0 right-0 w-[300px] h-[300px] bg-white/10 rounded-full blur-[80px] pointer-events-none -z-10"></div>
                 <div className="max-w-6xl mx-auto space-y-3">
                     <span className="px-3 py-1 bg-white/20 rounded-full text-[10px] font-black tracking-widest uppercase">Dashboard Pelanggan</span>
-                    <h2 className="text-3xl font-black tracking-tight">Selamat Datang Kembali, {customer.nama_pelanggan}!</h2>
+                    <h2 className="text-3xl font-black tracking-tight">Selamat Datang, {customer.nama_pelanggan}!</h2>
                     <p className="text-xs font-light text-white/80 max-w-xl">
                         Pantau status pengiriman air galon Anda, kelola pasokan langganan aktif, dan akses riwayat belanja Anda dengan mudah.
                     </p>
@@ -254,7 +254,7 @@ export default function CustomerDashboard({ initialData }) {
                                     </p>
                                 </div>
                                 <a 
-                                    href="/#order-wizard-section" 
+                                    href="/customer/beli" 
                                     className="w-full mt-4 py-3 bg-gradient-to-r from-sky-500 to-teal-400 hover:from-sky-600 hover:to-teal-500 text-white text-center rounded-xl text-xs font-bold uppercase tracking-wider transition-all block shadow-md"
                                 >
                                     Pesan Air Sekarang

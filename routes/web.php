@@ -14,6 +14,34 @@ use App\Http\Controllers\RiwayatStockController;
 use App\Http\Controllers\TransaksiController;
 use App\Http\Controllers\UserController;
 
+if (!function_exists('mock_customer_user')) {
+    function mock_customer_user(string $email): ?array
+    {
+        return session('mock_customer_users.' . $email);
+    }
+}
+
+if (!function_exists('store_mock_customer_user')) {
+    function store_mock_customer_user(array $user): void
+    {
+        session()->put('mock_customer_users.' . $user['email'], $user);
+    }
+}
+
+if (!function_exists('mock_admin_user')) {
+    function mock_admin_user(string $email): ?array
+    {
+        return session('mock_admin_users.' . $email);
+    }
+}
+
+if (!function_exists('store_mock_admin_user')) {
+    function store_mock_admin_user(array $user): void
+    {
+        session()->put('mock_admin_users.' . $user['email'], $user);
+    }
+}
+
 Route::get('/', function () {
     $produk = collect();
     $stats = [
@@ -177,6 +205,21 @@ Route::post('/admin/login', function (Illuminate\Http\Request $request) {
         ]);
     }
 
+    $sessionUser = mock_admin_user($credentials['email']);
+    if ($sessionUser && (Hash::check($credentials['password'], $sessionUser['password']) || $credentials['password'] === $sessionUser['password'])) {
+        session([
+            'admin_logged_in' => true,
+            'admin_id' => $sessionUser['id_admin'] ?? null,
+            'admin_name' => $sessionUser['nama_admin'] ?? $sessionUser['name'] ?? $credentials['email'],
+            'admin_email' => $sessionUser['email']
+        ]);
+        return response()->json([
+            'success' => true,
+            'message' => 'Login berhasil!',
+            'redirect' => route('admin.dashboard')
+        ]);
+    }
+
     // 2. Check Database if migrated
     try {
         if (Schema::hasTable('admin')) {
@@ -214,10 +257,9 @@ Route::get('/admin/register', function () {
 Route::post('/admin/register', function (Illuminate\Http\Request $request) {
     $validated = $request->validate([
         'nama_admin' => 'required|string|max:255',
-        'username' => 'required|string|max:255',
         'email' => 'required|email|max:100',
-        'password' => 'required|string|min:6',
-        'no_hp' => 'nullable|string|max:15'
+        'password' => 'required|string|min:6|confirmed',
+        'kode_perusahaan' => 'required|string|in:PRIMA'
     ]);
 
     try {
@@ -228,19 +270,13 @@ Route::post('/admin/register', function (Illuminate\Http\Request $request) {
                     'message' => 'Email sudah terdaftar.'
                 ], 422);
             }
-            if (\App\Models\admin::where('username', $validated['username'])->exists()) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Username sudah digunakan.'
-                ], 422);
-            }
-
             \App\Models\admin::create([
                 'nama_admin' => $validated['nama_admin'],
-                'username' => $validated['username'],
+                'username' => 'admin-' . strtolower(str_replace(' ', '', $validated['nama_admin'])) . '-' . rand(100, 999),
                 'email' => $validated['email'],
                 'password' => Hash::make($validated['password']),
-                'no_hp' => $validated['no_hp'] ?? null,
+                'no_hp' => null,
+                'kode_perusahaan' => strtoupper($validated['kode_perusahaan']),
                 'role' => 'staff',
                 'status_admin' => 'aktif'
             ]);
@@ -255,10 +291,17 @@ Route::post('/admin/register', function (Illuminate\Http\Request $request) {
         // Fallback for mocked preview if DB fails
     }
 
+    store_mock_admin_user([
+        'id_admin' => null,
+        'nama_admin' => $validated['nama_admin'],
+        'email' => $validated['email'],
+        'password' => Hash::make($validated['password']),
+    ]);
+
     return response()->json([
         'success' => true,
         'is_mocked' => true,
-        'message' => 'Registrasi disimulasikan (Database belum aktif). Silakan login!',
+        'message' => 'Registrasi admin berhasil disimpan untuk login sementara. Silakan login!',
         'redirect' => route('admin.login')
     ]);
 });
@@ -320,6 +363,21 @@ Route::post('/customer/login', function (Illuminate\Http\Request $request) {
         'password' => 'required|min:6'
     ]);
 
+    $sessionUser = mock_customer_user($validated['email']);
+    if ($sessionUser && (Hash::check($validated['password'], $sessionUser['password']) || $validated['password'] === $sessionUser['password'])) {
+        session([
+            'customer_logged_in' => true,
+            'customer_id' => $sessionUser['id_pelanggan'] ?? null,
+            'customer_name' => $sessionUser['nama_pelanggan'] ?? $sessionUser['name'] ?? $validated['email'],
+            'customer_email' => $sessionUser['email']
+        ]);
+        return response()->json([
+            'success' => true,
+            'message' => 'Login berhasil!',
+            'redirect' => route('customer.dashboard')
+        ]);
+    }
+
     try {
         if (Schema::hasTable('pelanggan')) {
             $pelanggan = \App\Models\pelanggan::where('email', $validated['email'])->first();
@@ -372,12 +430,7 @@ Route::post('/customer/register', function (Illuminate\Http\Request $request) {
     $validated = $request->validate([
         'nama_pelanggan' => 'required|string|max:255',
         'email' => 'required|email|max:100',
-        'password' => 'required|string|min:6',
-        'no_telepon' => 'required|string|max:20',
-        'alamat' => 'required|string',
-        'jenis_pelanggan' => 'required|in:individu,lembaga',
-        'nama_lembaga' => 'nullable|required_if:jenis_pelanggan,lembaga|string|max:255',
-        'penanggung_jawab' => 'nullable|string|max:255'
+        'password' => 'required|string|min:6|confirmed'
     ]);
 
     try {
@@ -399,11 +452,11 @@ Route::post('/customer/register', function (Illuminate\Http\Request $request) {
                 'nama_pelanggan' => $validated['nama_pelanggan'],
                 'email' => $validated['email'],
                 'password' => Hash::make($validated['password']),
-                'no_telepon' => $validated['no_telepon'],
-                'alamat' => $validated['alamat'],
-                'jenis_pelanggan' => $validated['jenis_pelanggan'],
-                'nama_lembaga' => $validated['nama_lembaga'] ?? null,
-                'penanggung_jawab' => $validated['penanggung_jawab'] ?? $validated['nama_pelanggan'],
+                'no_telepon' => '0000000000',
+                'alamat' => 'Alamat belum diisi',
+                'jenis_pelanggan' => 'individu',
+                'nama_lembaga' => null,
+                'penanggung_jawab' => $validated['nama_pelanggan'],
                 'tanggal_daftar' => now(),
                 'status_pelanggan' => 'aktif'
             ]);
@@ -418,10 +471,17 @@ Route::post('/customer/register', function (Illuminate\Http\Request $request) {
         // Fallback for mocked preview if DB fails
     }
 
+    store_mock_customer_user([
+        'id_pelanggan' => null,
+        'nama_pelanggan' => $validated['nama_pelanggan'],
+        'email' => $validated['email'],
+        'password' => Hash::make($validated['password']),
+    ]);
+
     return response()->json([
         'success' => true,
         'is_mocked' => true,
-        'message' => 'Registrasi pelanggan disimulasikan (Database belum aktif). Silakan login!',
+        'message' => 'Registrasi pelanggan berhasil disimpan untuk login sementara. Silakan login!',
         'redirect' => route('customer.login')
     ]);
 });
@@ -433,7 +493,7 @@ Route::get('/customer/dashboard', function () {
 
     $customerId = session('customer_id');
     $customerEmail = session('customer_email');
-    
+
     $customer = null;
     $transaksi = collect();
     $langganan = collect();
@@ -455,8 +515,34 @@ Route::get('/customer/dashboard', function () {
         // Fallback silently if DB is unconfigured
     }
 
+    if (!$customer) {
+        $customer = (object) [
+            'id_pelanggan' => session('customer_id'),
+            'nama_pelanggan' => session('customer_name') ?: 'Pelanggan',
+            'email' => session('customer_email') ?: '',
+            'no_telepon' => '0812-0000-0000',
+            'alamat' => 'Alamat belum diisi',
+            'jenis_pelanggan' => 'individu',
+        ];
+    }
+
     return view('customer.dashboard', compact('customer', 'transaksi', 'langganan'));
 })->name('customer.dashboard');
+
+Route::get('/customer/beli', function () {
+    if (!session('customer_logged_in')) {
+        return redirect()->route('customer.login');
+    }
+
+    return view('customer.beli', [
+        'customer' => (object) [
+            'nama_pelanggan' => session('customer_name') ?: 'Pelanggan',
+            'email' => session('customer_email') ?: '',
+            'no_telepon' => '',
+            'alamat' => '',
+        ],
+    ]);
+})->name('customer.beli');
 
 Route::post('/customer/logout', function () {
     session()->forget(['customer_logged_in', 'customer_id', 'customer_name', 'customer_email']);

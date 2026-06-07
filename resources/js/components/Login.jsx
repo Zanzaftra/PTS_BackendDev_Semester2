@@ -191,8 +191,8 @@ export default function Login() {
 
                 {/* Helpful Hint Box */}
                 <div className="p-4 bg-white/5 rounded-xl border border-white/5 text-[11px] text-slate-400 font-light leading-relaxed">
-                    <span className="font-semibold text-slate-200 block mb-1">💡 Petunjuk Masuk Demo</span>
-                    Gunakan email <span className="font-bold text-blue-400">admin@rinduwater.com</span> dan sandi <span className="font-bold text-blue-400">admin123</span> untuk otentikasi cepat.
+                    <span className="font-semibold text-slate-200 block mb-1">💡 Informasi Login</span>
+                    Gunakan akun admin yang Anda daftarkan. Jika belum memiliki akun, silakan daftar terlebih dahulu melalui halaman daftar.
                 </div>
             </div>
         </div>
