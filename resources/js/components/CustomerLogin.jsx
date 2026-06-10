@@ -185,10 +185,8 @@ export default function CustomerLogin() {
 
                 {/* Helpful Hint Box */}
                 <div className="p-4 bg-white/5 rounded-xl border border-white/5 text-[11px] text-slate-400 font-light leading-relaxed font-sans">
-                    <span className="font-semibold text-slate-200 block mb-1">💡 Uji Coba Demo</span>
-                    Email: <span className="font-bold text-sky-400">customer@rinduwater.com</span>
-                    <br />
-                    Password: <span className="font-bold text-sky-400">customer123</span>
+                    <span className="font-semibold text-slate-200 block mb-1">💡 Informasi Login</span>
+                    Gunakan akun yang Anda daftarkan saat ini. Jika belum punya akun, pilih opsi daftar di halaman ini.
                 </div>
             </div>
         </div>

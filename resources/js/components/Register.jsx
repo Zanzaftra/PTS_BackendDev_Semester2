@@ -2,10 +2,10 @@ import React, { useState } from 'react';
 
 export default function Register() {
     const [namaAdmin, setNamaAdmin] = useState('');
-    const [username, setUsername] = useState('');
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
-    const [noHp, setNoHp] = useState('');
+    const [passwordConfirmation, setPasswordConfirmation] = useState('');
+    const [kodePerusahaan, setKodePerusahaan] = useState('');
     const [showPassword, setShowPassword] = useState(false);
     
     const [error, setError] = useState('');
@@ -14,9 +14,10 @@ export default function Register() {
 
     // Client-side validations
     const [namaError, setNamaError] = useState('');
-    const [userError, setUserError] = useState('');
     const [emailError, setEmailError] = useState('');
     const [passwordError, setPasswordError] = useState('');
+    const [confirmationError, setConfirmationError] = useState('');
+    const [kodeError, setKodeError] = useState('');
 
     const validateNama = (val) => {
         if (!val) {
@@ -27,16 +28,16 @@ export default function Register() {
         return true;
     };
 
-    const validateUsername = (val) => {
+    const validateConfirmation = (val) => {
         if (!val) {
-            setUserError('Username wajib diisi.');
+            setConfirmationError('Konfirmasi kata sandi wajib diisi.');
             return false;
         }
-        if (val.length < 3) {
-            setUserError('Username minimal 3 karakter.');
+        if (val !== password) {
+            setConfirmationError('Konfirmasi kata sandi tidak cocok.');
             return false;
         }
-        setUserError('');
+        setConfirmationError('');
         return true;
     };
 
@@ -67,17 +68,31 @@ export default function Register() {
         return true;
     };
 
+    const validateKode = (val) => {
+        if (!val) {
+            setKodeError('Kode perusahaan wajib diisi.');
+            return false;
+        }
+        if (val.trim().toUpperCase() !== 'PRIMA') {
+            setKodeError('Kode perusahaan salah. Gunakan kode PRIMA.');
+            return false;
+        }
+        setKodeError('');
+        return true;
+    };
+
     const handleSubmit = async (e) => {
         e.preventDefault();
         setError('');
         setSuccess('');
 
         const isNamaValid = validateNama(namaAdmin);
-        const isUserValid = validateUsername(username);
         const isEmailValid = validateEmail(email);
         const isPasswordValid = validatePassword(password);
+        const isConfirmationValid = validateConfirmation(passwordConfirmation);
+        const isKodeValid = validateKode(kodePerusahaan);
 
-        if (!isNamaValid || !isUserValid || !isEmailValid || !isPasswordValid) return;
+        if (!isNamaValid || !isEmailValid || !isPasswordValid || !isConfirmationValid || !isKodeValid) return;
 
         setLoading(true);
         try {
@@ -90,10 +105,10 @@ export default function Register() {
                 },
                 body: JSON.stringify({
                     nama_admin: namaAdmin,
-                    username,
                     email,
                     password,
-                    no_hp: noHp
+                    password_confirmation: passwordConfirmation,
+                    kode_perusahaan: kodePerusahaan
                 })
             });
 
@@ -168,35 +183,22 @@ export default function Register() {
                         {namaError && <span className="text-[10px] font-semibold text-rose-400 block">{namaError}</span>}
                     </div>
 
-                    {/* Grid for Username and Phone */}
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                        <div className="space-y-2">
-                            <label className="block text-xs font-bold text-slate-400 uppercase tracking-widest">Username</label>
-                            <input 
-                                type="text" 
-                                value={username}
-                                onChange={(e) => {
-                                    setUsername(e.target.value);
-                                    if(userError) validateUsername(e.target.value);
-                                }}
-                                onBlur={(e) => validateUsername(e.target.value)}
-                                required
-                                placeholder="zaki_admin" 
-                                className={`w-full px-4 py-3 bg-slate-950/40 border ${userError ? 'border-rose-500/50' : 'border-white/10 focus:border-blue-500'} rounded-xl text-sm focus:outline-none text-white transition shadow-inner`}
-                            />
-                            {userError && <span className="text-[10px] font-semibold text-rose-400 block">{userError}</span>}
-                        </div>
-
-                        <div className="space-y-2">
-                            <label className="block text-xs font-bold text-slate-400 uppercase tracking-widest">Nomor HP</label>
-                            <input 
-                                type="text" 
-                                value={noHp}
-                                onChange={(e) => setNoHp(e.target.value)}
-                                placeholder="08123456789" 
-                                className="w-full px-4 py-3 bg-slate-950/40 border border-white/10 focus:border-blue-500 rounded-xl text-sm focus:outline-none text-white transition shadow-inner"
-                            />
-                        </div>
+                    {/* Company code */}
+                    <div className="space-y-2">
+                        <label className="block text-xs font-bold text-slate-400 uppercase tracking-widest">Kode Perusahaan</label>
+                        <input
+                            type="text"
+                            value={kodePerusahaan}
+                            onChange={(e) => {
+                                setKodePerusahaan(e.target.value);
+                                if(kodeError) validateKode(e.target.value);
+                            }}
+                            onBlur={(e) => validateKode(e.target.value)}
+                            required
+                            placeholder="PRIMA"
+                            className={`w-full px-4 py-3 bg-slate-950/40 border ${kodeError ? 'border-rose-500/50' : 'border-white/10 focus:border-blue-500'} rounded-xl text-sm focus:outline-none text-white transition shadow-inner`}
+                        />
+                        {kodeError && <span className="text-[10px] font-semibold text-rose-400 block">{kodeError}</span>}
                     </div>
 
                     {/* Email */}
@@ -227,6 +229,7 @@ export default function Register() {
                                 onChange={(e) => {
                                     setPassword(e.target.value);
                                     if(passwordError) validatePassword(e.target.value);
+                                    if(confirmationError) validateConfirmation(passwordConfirmation);
                                 }}
                                 onBlur={(e) => validatePassword(e.target.value)}
                                 required
@@ -251,6 +254,23 @@ export default function Register() {
                             </button>
                         </div>
                         {passwordError && <span className="text-[10px] font-semibold text-rose-400 block">{passwordError}</span>}
+                    </div>
+
+                    <div className="space-y-2">
+                        <label className="block text-xs font-bold text-slate-400 uppercase tracking-widest">Konfirmasi Kata Sandi</label>
+                        <input
+                            type={showPassword ? 'text' : 'password'}
+                            value={passwordConfirmation}
+                            onChange={(e) => {
+                                setPasswordConfirmation(e.target.value);
+                                if(confirmationError) validateConfirmation(e.target.value);
+                            }}
+                            onBlur={(e) => validateConfirmation(e.target.value)}
+                            required
+                            placeholder="Ulangi kata sandi"
+                            className={`w-full px-4 py-3 bg-slate-950/40 border ${confirmationError ? 'border-rose-500/50' : 'border-white/10 focus:border-blue-500'} rounded-xl text-sm focus:outline-none text-white transition shadow-inner`}
+                        />
+                        {confirmationError && <span className="text-[10px] font-semibold text-rose-400 block">{confirmationError}</span>}
                     </div>
 
                     {/* Submit Button */}
