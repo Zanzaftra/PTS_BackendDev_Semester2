@@ -6,12 +6,12 @@ use Illuminate\Http\Request;
 
 class TransaksiController extends Controller
 {
-    public function index():view
+    public function index()
     {$transaksi = \App\Models\transaksi::all();
     return view('transaksi.index', compact('transaksi'));
 
     }
-    public function create():view
+    public function create()
     {
         return view('transaksi.create');
     }
@@ -22,15 +22,15 @@ class TransaksiController extends Controller
             'metode_pembayaran' => 'required|string|max:255',
             'total_bayar' => 'required|numeric|min:0',
             'status_transaksi' => 'required|string',
-            'kode_invoice' => 'required|string|max:255|unique:transaksis',
+            'kode_invoice' => 'required|string|max:255|unique:transaksi',
             'catatan' => 'nullable|string',
         ]);
 
-        \App\Models\transaksi::create($request ->All());
+        \App\Models\transaksi::create($validated);
 
         return redirect()->route('transaksi.index')->with('success', 'Transaksi berhasil ditambahkan.');
     }
-    function edit(string $id):view
+    function edit(string $id)
     {
         $transaksi = \App\Models\transaksi::findOrFail($id);
         return view('transaksi.edit', compact('transaksi'));
@@ -42,12 +42,12 @@ class TransaksiController extends Controller
             'metode_pembayaran' => 'required|string|max:255',
             'total_bayar' => 'required|numeric|min:0',
             'status_transaksi' => 'required|string',
-            'kode_invoice' => 'required|string|max:255|unique:transaksis,kode_invoice,'.$id,
+            'kode_invoice' => 'required|string|max:255|unique:transaksi,kode_invoice,'.$id.',id_transaksi',
             'catatan' => 'nullable|string',
         ]);
 
         $transaksi = \App\Models\transaksi::findOrFail($id);
-        $transaksi->update($request ->All());
+        $transaksi->update($validated);
 
         return redirect()->route('transaksi.index')->with('success', 'data berhasil diubah.');
     }

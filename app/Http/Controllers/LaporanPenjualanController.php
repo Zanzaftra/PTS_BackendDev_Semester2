@@ -6,12 +6,12 @@ use Illuminate\Http\Request;
 
 class LaporanPenjualanController extends Controller
 {
-    public function index():view
+    public function index()
     {$laporan_penjualan = \App\Models\laporan_penjualan::all();
     return view('laporan_penjualan.index', compact('laporan_penjualan'));
 
     }
-    public function create():view
+    public function create()
     {
         return view('laporan_penjualan.create');
     }
@@ -25,11 +25,11 @@ class LaporanPenjualanController extends Controller
             'tanggal_dibuat' => 'required|date',
         ]);
 
-        \App\Models\laporan_penjualan::create($request ->All());
+        \App\Models\laporan_penjualan::create($validated);
 
         return redirect()->route('laporan_penjualan.index')->with('success', 'Laporan Penjualan berhasil ditambahkan.');
     }
-    function edit(string $id):view
+    function edit(string $id)
     {
         $laporan_penjualan = \App\Models\laporan_penjualan::findOrFail($id);
         return view('laporan_penjualan.edit', compact('laporan_penjualan'));
@@ -45,7 +45,7 @@ class LaporanPenjualanController extends Controller
         ]);
 
         $laporan_penjualan = \App\Models\laporan_penjualan::findOrFail($id);
-        $laporan_penjualan->update($request ->All());
+        $laporan_penjualan->update($validated);
 
         return redirect()->route('laporan_penjualan.index')->with('success', 'data berhasil diubah.');
     }

@@ -6,12 +6,12 @@ use Illuminate\Http\Request;
 
 class ProdukAirController extends Controller
 {
-    public function index():view
+    public function index()
     {$produk_air = \App\Models\produk_air::all();
     return view('produk_air.index', compact('produk_air'));
 
     }
-    public function create():view
+    public function create()
     {
         return view('produk_air.create');
     }
@@ -29,11 +29,11 @@ class ProdukAirController extends Controller
             'deskripsi' => 'nullable|string',
         ]);
 
-        \App\Models\produk_air::create($request ->All());
+        \App\Models\produk_air::create($validated);
 
         return redirect()->route('produk_air.index')->with('success', 'Produk Air berhasil ditambahkan.');
     }
-    function edit(string $id):view
+    function edit(string $id)
     {
         $produk_air = \App\Models\produk_air::findOrFail($id);
         return view('produk_air.edit', compact('produk_air'));
@@ -53,7 +53,7 @@ class ProdukAirController extends Controller
         ]);
 
         $produk_air = \App\Models\produk_air::findOrFail($id);
-        $produk_air->update($request ->All());
+        $produk_air->update($validated);
 
         return redirect()->route('produk_air.index')->with('success', 'data berhasil diubah.');
     }

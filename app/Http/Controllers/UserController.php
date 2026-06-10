@@ -6,12 +6,12 @@ use Illuminate\Http\Request;
 
 class UserController extends Controller
 {
-    public function index():view
+    public function index()
     {$user = \App\Models\User::all();
     return view('users.index', compact('user'));
 
     }
-    public function create():view
+    public function create()
     {
         return view('users.create');
     }
@@ -23,11 +23,11 @@ class UserController extends Controller
             'password' => 'required|string|min:6|confirmed',
         ]);
 
-        \App\Models\User::create($request ->All());
+        \App\Models\User::create($validated);
 
         return redirect()->route('users.index')->with('success', 'User created successfully.');
     }
-    function edit(string $id):view
+    function edit(string $id)
     {
         $user = \App\Models\User::findOrFail($id);
         return view('users.edit', compact('user'));
@@ -41,7 +41,7 @@ class UserController extends Controller
         ]);
 
         $user = \App\Models\User::findOrFail($id);
-        $user->update($request ->All());
+        $user->update($validated);
 
         return redirect()->route('users.index')->with('success', 'data berhasil diubah.');
     }

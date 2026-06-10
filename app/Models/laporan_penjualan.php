@@ -8,6 +8,9 @@ use Illuminate\Database\Eloquent\Model;
 class laporan_penjualan extends Model
 {
     use HasFactory;
+
+    protected $table = 'laporan_penjualan';
+    protected $primaryKey = 'id_laporan';
     
     protected $fillable = [
         'periode_laporan',

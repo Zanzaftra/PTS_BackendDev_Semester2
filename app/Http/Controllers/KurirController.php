@@ -6,12 +6,12 @@ use Illuminate\Http\Request;
 
 class KurirController extends Controller
 {
-    public function index():view
+    public function index()
     {$kurir = \App\Models\kurir::all();
     return view('kurir.index', compact('kurir'));
 
     }
-    public function create():view
+    public function create()
     {
         return view('kurir.create');
     }
@@ -27,11 +27,11 @@ class KurirController extends Controller
             'catatan' => 'nullable|string',
         ]);
 
-        \App\Models\kurir::create($request ->All());
+        \App\Models\kurir::create($validated);
 
         return redirect()->route('kurir.index')->with('success', 'Kurir berhasil ditambahkan.');
     }
-    function edit(string $id):view
+    function edit(string $id)
     {
         $kurir = \App\Models\kurir::findOrFail($id);
         return view('kurir.edit', compact('kurir'));
@@ -49,7 +49,7 @@ class KurirController extends Controller
         ]);
 
         $kurir = \App\Models\kurir::findOrFail($id);
-        $kurir->update($request ->All());
+        $kurir->update($validated);
 
         return redirect()->route('kurir.index')->with('success', 'data berhasil diubah.');
     }

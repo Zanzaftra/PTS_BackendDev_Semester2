@@ -565,7 +565,7 @@ Route::post('/customer/logout', function () {
 // Update transaction status
 Route::post('/admin/api/transaksi/{id}/status', function (Illuminate\Http\Request $request, $id) {
     $validated = $request->validate([
-        'status' => 'required|in:menunggu,dibayar,diproses,dikirim,selesai,batal'
+        'status' => 'required|in:menunggu,dibayar,dikirim,selesai,dibatalkan'
     ]);
 
     try {

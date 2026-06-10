@@ -6,18 +6,20 @@ use Illuminate\Http\Request;
 
 class PengirimanController extends Controller
 {
-    public function index():view
+    public function index()
     {$pengiriman = \App\Models\pengiriman::all();
     return view('pengiriman.index', compact('pengiriman'));
 
     }
-    public function create():view
+    public function create()
     {
         return view('pengiriman.create');
     }
     public function store (Request $request)
     {
         $validated = $request->validate([
+            'id_transaksi' => 'required|integer',
+            'id_kurir' => 'nullable|integer',
             'alamat_tujuan' => 'required|string',
             'tanggal_pengiriman' => 'required|date',
             'status_pengiriman' => 'required|string',
@@ -25,11 +27,11 @@ class PengirimanController extends Controller
             'catatan_kurir' => 'nullable|string',
         ]);
 
-        \App\Models\pengiriman::create($request ->All());
+        \App\Models\pengiriman::create($validated);
 
         return redirect()->route('pengiriman.index')->with('success', 'Pengiriman berhasil ditambahkan.');
     }
-    function edit(string $id):view
+    function edit(string $id)
     {
         $pengiriman = \App\Models\pengiriman::findOrFail($id);
         return view('pengiriman.edit', compact('pengiriman'));
@@ -45,7 +47,7 @@ class PengirimanController extends Controller
         ]);
 
         $pengiriman = \App\Models\pengiriman::findOrFail($id);
-        $pengiriman->update($request ->All());
+        $pengiriman->update($validated);
 
         return redirect()->route('pengiriman.index')->with('success', 'data berhasil diubah.');
     }

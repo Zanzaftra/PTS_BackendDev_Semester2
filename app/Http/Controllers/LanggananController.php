@@ -6,18 +6,20 @@ use Illuminate\Http\Request;
 
 class LanggananController extends Controller
 {
-    public function index():view
+    public function index()
     {$langganan = \App\Models\langganan::all();
     return view('langganan.index', compact('langganan'));
 
     }
-    public function create():view
+    public function create()
     {
         return view('langganan.create');
     }
     public function store (Request $request)
     {
         $validated = $request->validate([
+            'id_pelanggan' => 'required|integer',
+            'id_produk' => 'required|integer',
             'periode_pengantaran' => 'required|string|max:255',
             'tanggal_mulai' => 'required|date',
             'tanggal_berakhir' => 'required|date',
@@ -25,11 +27,11 @@ class LanggananController extends Controller
             'status_langganan' => 'required|string',
         ]);
 
-        \App\Models\langganan::create($request ->All());
+        \App\Models\langganan::create($validated);
 
         return redirect()->route('langganan.index')->with('success', 'Langganan berhasil ditambahkan.');
     }
-    function edit(string $id):view
+    function edit(string $id)
     {
         $langganan = \App\Models\langganan::findOrFail($id);
         return view('langganan.edit', compact('langganan'));
@@ -45,7 +47,7 @@ class LanggananController extends Controller
         ]);
 
         $langganan = \App\Models\langganan::findOrFail($id);
-        $langganan->update($request ->All());
+        $langganan->update($validated);
 
         return redirect()->route('langganan.index')->with('success', 'data berhasil diubah.');
     }

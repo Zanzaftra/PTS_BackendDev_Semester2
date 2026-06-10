@@ -6,12 +6,12 @@ use Illuminate\Http\Request;
 
 class PelangganController extends Controller
 {
-    public function index():view
+    public function index()
     {$pelanggan = \App\Models\pelanggan::all();
     return view('pelanggan.index', compact('pelanggan'));
 
     }
-    public function create():view
+    public function create()
     {
         return view('pelanggan.create');
     }
@@ -24,16 +24,16 @@ class PelangganController extends Controller
             'penanggung_jawab' => 'nullable|string|max:255',
             'alamat' => 'required|string',
             'no_telepon' => 'required|string|max:15',
-            'email' => 'required|email|max:100|unique:pelanggans',
+            'email' => 'required|email|max:100|unique:pelanggan',
             'tanggal_daftar' => 'required|date',
             'status_pelanggan' => 'required|string',
         ]);
 
-        \App\Models\pelanggan::create($request ->All());
+        \App\Models\pelanggan::create($validated);
 
         return redirect()->route('pelanggan.index')->with('success', 'Pelanggan berhasil ditambahkan.');
     }
-    function edit(string $id):view
+    function edit(string $id)
     {
         $pelanggan = \App\Models\pelanggan::findOrFail($id);
         return view('pelanggan.edit', compact('pelanggan'));
@@ -47,13 +47,13 @@ class PelangganController extends Controller
             'penanggung_jawab' => 'nullable|string|max:255',
             'alamat' => 'required|string',
             'no_telepon' => 'required|string|max:15',
-            'email' => 'required|email|max:100|unique:pelanggans,email,'.$id,
+            'email' => 'required|email|max:100|unique:pelanggan,email,'.$id.',id_pelanggan',
             'tanggal_daftar' => 'required|date',
             'status_pelanggan' => 'required|string',
         ]);
 
         $pelanggan = \App\Models\pelanggan::findOrFail($id);
-        $pelanggan->update($request ->All());
+        $pelanggan->update($validated);
 
         return redirect()->route('pelanggan.index')->with('success', 'data berhasil diubah.');
     }

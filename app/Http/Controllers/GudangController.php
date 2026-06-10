@@ -6,12 +6,12 @@ use Illuminate\Http\Request;
 
 class GudangController extends Controller
 {
-    public function index():view
+    public function index()
     {$gudang = \App\Models\gudang::all();
     return view('gudang.index', compact('gudang'));
 
     }
-    public function create():view
+    public function create()
     {
         return view('gudang.create');
     }
@@ -25,11 +25,11 @@ class GudangController extends Controller
             'status_gudang' => 'required|string',
         ]);
 
-        \App\Models\gudang::create($request ->All());
+        \App\Models\gudang::create($validated);
 
         return redirect()->route('gudang.index')->with('success', 'Gudang berhasil ditambahkan.');
     }
-    function edit(string $id):view
+    function edit(string $id)
     {
         $gudang = \App\Models\gudang::findOrFail($id);
         return view('gudang.edit', compact('gudang'));
@@ -45,7 +45,7 @@ class GudangController extends Controller
         ]);
 
         $gudang = \App\Models\gudang::findOrFail($id);
-        $gudang->update($request ->All());
+        $gudang->update($validated);
 
         return redirect()->route('gudang.index')->with('success', 'data berhasil diubah.');
     }
